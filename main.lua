@@ -4,31 +4,28 @@
 
 local ArrayField = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/ArrayField/main/Source.lua'))()
 getgenv().SecureMode = true
-
--- Rayfield 라이브러리 로드
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- Rayfield 윈도우 생성
 local Window = Rayfield:CreateWindow({
 	Name = "IWV Hub Reborn",
 	LoadingTitle = "IWV..",
 	LoadingSubtitle = "by songminseo123",
 	ConfigurationSaving = {
 		Enabled = false,
-		FolderName = nil,  -- 기본 폴더 사용
+		FolderName = nil,
 		FileName = "IWV Hub"
 	},
-	KeySystem = true, -- 기본 키 시스템 비활성화
+	KeySystem = true,
 	KeySettings = {
-		Title = "IWV",
+		Title = "IWV hub Reborn",
 		Subtitle = "Key System",
-		Note = "IWV Script 2024-08-31\nACS Engine & CE Engine 부대테러",
+		Note = "Credit to IWV key : 12345678",
 		FileName = "Key",
 		SaveKey = false,
 		GrabKeyFromSite = false,
 		Key = {
 			[1] = "12345678"
-		} -- 이 필드는 비워두고 직접 검증 로직 구현
+		}
 	}
 })
 ---------------------- 기본기능 함수 모음 -----------------------
@@ -38,13 +35,13 @@ local Player = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local camera = workspace.CurrentCamera
-
--- 밥밥부대 탈옥감지 무력화
+-- 밥밥 탈옥 무력화 --
 local lineObject = game:GetService("ReplicatedStorage"):FindFirstChild("line")
 
 if lineObject then
-	lineObject:Destroy() -- line 객체를 제거합니다.
+	lineObject:Destroy()
 end
+-- 밥밥 탈옥 무력화 --
 
 -- 플래그 및 상태 변수
 local isKeyValid = false
@@ -95,24 +92,6 @@ local currentColorIndex = 1
 
 local ToggleFly, ToggleNoclip, ToggleESP, ToggleSpin, ToggleKillAura, ToggleAimBot, ToggleStaticCuff, ToggleTpKill
 local ToggleWeaponSize, ToggleSwordAttack
-
------------------------- 키 인증 부분 -------------------------------
--- Pastebin 링크
-local dataUrl = 'https://pastebin.com/raw/HFHDpMQR'
-
--- 데이터를 가져오는 코드
-local success, response = pcall(function()
-	local jsonData = game:HttpGet(dataUrl)
-	return HttpService:JSONDecode(jsonData)
-end)
-
-if success then
-	keysData = response
-else
-	warn("Failed to fetch JSON data: " .. tostring(response))
-end
------------------------- 키 인증 부분 -------------------------------
-local Players = game:GetService("Players")
 
 -- 함수: 유저 ID나 유저 닉네임의 일부를 통해 플레이어의 디스플레이 닉네임을 찾습니다.
 local function findPlayerDisplayName(identifier)
@@ -176,84 +155,6 @@ local function gangchulUnCuff()
 end
 
 ------------------------ 프리즌 라이프 -------------------------------
-local function Kick_Server()
-    -- AK-47 아이템을 workspace에서 찾음
-	local akItem = workspace[game.Players.LocalPlayer.Name]:FindFirstChild("AK-47")
-	if not akItem then
-		warn("AK-47 not found in workspace")
-		return
-	end
-	local gunStatesModule = akItem:FindFirstChild("GunStates")
-	if not gunStatesModule then
-		warn("GunStates ModuleScript not found in AK-47")
-		return
-	end
-
-    -- GunStates 모듈스크립트에서 반환된 테이블 수정
-	local gunStates = require(gunStatesModule)
-	gunStates.Damage = 1000
-	gunStates.Description = "Remember to put a description here BEFORE the game is published -Me"
-	gunStates.MaxAmmo = 100000000
-	gunStates.CurrentAmmo = 10000000
-	gunStates.StoredAmmo = 600
-	gunStates.FireRate = 0.00000001
-	gunStates.AutoFire = true
-	gunStates.Range = 100000000
-	gunStates.Spread = 14
-	gunStates.ReloadTime = 0.01
-	gunStates.Bullets = 0
-	gunStates.ReloadAnim = "ReloadMagazine"
-	gunStates.ShootAnim = "ShootBullet"
-	gunStates.HoldAnim = "Hold"
-	gunStates.FireSoundId = "http://www.roblox.com/asset/?id=2934888736"
-	gunStates.SecondarySoundId = nil
-	gunStates.ReloadSoundId = "http://www.roblox.com/asset/?id=2934887229"
-
-    -- 수정된 GunStates 테이블을 ReloadEvent로 서버에 전달
-	game:GetService("ReplicatedStorage").ReloadEvent:FireServer(akItem)
-end
-
-local function teleport_f()
-	local character = Player.Character or Player.CharacterAdded:Wait()
-	local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-	local targetPosition = Vector3.new(-936, 93, 2056)
-	local originalPosition = humanoidRootPart.Position
-	local function teleportToPosition(position)
-		humanoidRootPart.CFrame = CFrame.new(position)
-	end
-	local function hasAK47()
-		for _, item in pairs(Player.Backpack:GetChildren()) do
-			if item.Name == "AK-47" then
-				return true
-			end
-		end
-		return false
-	end
-	local function performAction()
-		local ak47Item = workspace.Prison_ITEMS.giver:FindFirstChild("AK-47")
-		if ak47Item and ak47Item:IsA("Model") and ak47Item:FindFirstChild("ITEMPICKUP") then
-			local args = {
-				ak47Item.ITEMPICKUP
-			}
-			workspace.Remote.ItemHandler:InvokeServer(unpack(args))
-		else
-			warn("AK-47 item not found or ITEMPICKUP not available.")
-		end
-	end
-	local function returnToOriginalPosition()
-		humanoidRootPart.CFrame = CFrame.new(originalPosition)
-	end
-	local function teleportAndPerformAction()
-		teleportToPosition(targetPosition)
-		wait(0.1)
-		while not hasAK47() do
-			performAction()
-			wait(0.1)
-		end
-		returnToOriginalPosition()
-	end
-	teleportAndPerformAction()
-end
 
 local function getTargetPlayers()
 	local targetPlayers = {}
@@ -267,63 +168,12 @@ local function getTargetPlayers()
 	return targetPlayers
 end
 
--- 공격 루프 관리 변수
-local attacking = false
-
--- 공격 함수
-local function attackAllPlayers(onoff)
-    -- ReplicatedStorage와 공격 이벤트 가져오기
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local meleeEvent = ReplicatedStorage:WaitForChild("meleeEvent")
-
-    -- 공격 시작 또는 중지 설정
-	attacking = onoff
-	if not attacking then
-		return -- 공격 중지
-	end
-
-    -- 대상 플레이어 목록 가져오기
-	local players = game:GetService("Players"):GetPlayers()
-	local localPlayer = game:GetService("Players").LocalPlayer
-	local character = localPlayer.Character
-	if not (character and character:FindFirstChild("HumanoidRootPart")) then
-		return -- 로컬 플레이어가 유효하지 않을 경우 종료
-	end
-
-    -- 모든 플레이어를 대상으로 공격 루프
-	while true do
-		if not attacking then
-			break -- 공격 중지
-		end
-		for _, player in pairs(players) do
-			if not attacking then
-				break -- 공격 중지
-			end
-			if player ~= localPlayer and player.Character and player.Character:FindFirstChild("Humanoid") then
-				local targetCharacter = player.Character
-				local targetHumanoid = targetCharacter.Humanoid
-				if targetHumanoid.Health > 0 and targetCharacter:FindFirstChild("HumanoidRootPart") then
-                    -- 로컬 플레이어를 타겟 플레이어 근처로 텔레포트
-					character.HumanoidRootPart.CFrame = targetCharacter.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3) -- 약간 뒤로 이동
-
-                    -- 공격 이벤트 발송
-					meleeEvent:FireServer(player)
-				end
-			end
-		end
-		wait(0.009) -- 이벤트 발송 간격
-	end
-
-    -- 공격 종료
-	attacking = false
-end
 ------------------------ 프리즌 라이프 -------------------------------
 --------------------------------------- 은신 기능 ----------------------------------------------------
 -- 서비스와 플레이어 참조
-local players = game:GetService("Players")
 local runService = game:GetService("RunService")
 local userInputService = game:GetService("UserInputService")
-local localPlayer = players.LocalPlayer
+local localPlayer = game.Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
 function Transparency_toggle_bt(value)
@@ -1288,23 +1138,29 @@ function ACS_Player_fli()
 	PlaceBlockRemote:InvokeServer(unpack(args))
 end
 
-local function ACS_Palyer_fli2()
+local function ACS_Player_fli2()
 	local a = game:GetService("Players").LocalPlayer
-local b = a:GetMouse()
-local c = game:GetService("ReplicatedStorage"):WaitForChild("ACS_Engine"):WaitForChild("Events"):WaitForChild("Breach")
-
-b.Button1Down:Connect(function()
-    local d = b.Hit.p
-    a.Character.ACS_Client.Kit.Fortifications.Value = 1000
-
-    c:InvokeServer(
+	local b = a:GetMouse()
+	local c = game:GetService("ReplicatedStorage"):WaitForChild("ACS_Engine"):WaitForChild("Events"):WaitForChild("Breach")
+	b.Button1Down:Connect(function()
+		local d = b.Hit.p
+		a.Character.ACS_Client.Kit.Fortifications.Value = 1000
+		c:InvokeServer(
         3,
-        { Fortified = { Value = true }, Destroyable = workspace },
+        {
+			Fortified = {
+				Value = true
+			},
+			Destroyable = workspace
+		},
         d,
         nil,
-        { Size = Vector3.new(999999999999999, 9999999999999999999999, 99999999999999999999), CFrame = CFrame.new(d) }
+        {
+			Size = Vector3.new(999999999999999, 9999999999999999999999, 99999999999999999999),
+			CFrame = CFrame.new(d)
+		}
     )
-end)
+	end)
 end
 
 
@@ -1870,39 +1726,16 @@ end
 ---------------------- 부대게임, 밥밥부대 끝 ------------------------------
 ---------------------- 부대게임, 태비부대 ------------------------------
 function Toggle_Tebi_tool_giver_f()
-	local function addUniqueToolsToInventory()
-        -- 로컬 플레이어 가져오기
-		local player = game.Players.LocalPlayer
-    
-        -- 이미 추가된 도구 이름을 저장할 테이블
-		local addedTools = {}
-    
-        -- 가져올 도구 이름 리스트
-		local toolNames = {
-			"NULL",
-			"엘더플레임 AK74",
-			"프로토타입 AK12",
-			"관통기",
-			"프로토타입-S",
-			"새해 K2",
-			"프라임 벤달",
-			"스피커 K2",
-			"외교부 키"
-		}
-    
-        -- 게임 내 모든 Tool 탐색
-		for _, tool in pairs(game:GetDescendants()) do
-			if tool:IsA("Tool") and not addedTools[tool.Name] and table.find(toolNames, tool.Name) then
-                -- 중복되지 않고 리스트에 있는 Tool만 추가
-				local toolClone = tool:Clone()
-				toolClone.Parent = player.Backpack
-				addedTools[tool.Name] = true  -- 추가된 도구 이름 기록
-			end
+	local player = game.Players.LocalPlayer
+	local added = {}
+	local toolNames = {["NULL"]=true, ["엘더플레임 AK74"]=true, ["프로토타입 AK12"]=true, ["관통기"]=true, ["프로토타입-S"]=true, ["새해 K2"]=true, ["프라임 벤달"]=true, ["스피커 K2"]=true, ["외교부 키"]=true}
+
+	for _, tool in pairs(game:GetDescendants()) do
+		if tool:IsA("Tool") and toolNames[tool.Name] and not added[tool.Name] then
+			tool:Clone().Parent = player.Backpack
+			added[tool.Name] = true
 		end
 	end
-    
-    -- 함수 실행
-	addUniqueToolsToInventory()
 end
 
 function Toggle_Tebi_vote_f()
@@ -1942,43 +1775,32 @@ local localPlayer = Players.LocalPlayer
 
 -- 수갑을 소유한 플레이어를 찾는 함수
 local function findPlayerWithCuffs()
-	for _, player in ipairs(Players:GetPlayers()) do
-		local backpack = player:FindFirstChild("Backpack")
-		if backpack and backpack:FindFirstChild("수갑") then
-			return player
+	for _, p in ipairs(Players:GetPlayers()) do
+		local cuffs = p:FindFirstChild("Backpack") and p.Backpack:FindFirstChild("수갑")
+		if cuffs then
+			return cuffs
 		end
 	end
-	return nil
 end
 
 -- 모든 플레이어를 수갑으로 묶는 함수
 local function cuffAllPlayersa()
-	local playerWithCuffs = findPlayerWithCuffs()
-	if playerWithCuffs then
-		local backpack = playerWithCuffs:FindFirstChild("Backpack")
-		local cuffs = backpack and backpack:FindFirstChild("수갑")
-		if cuffs and cuffs:FindFirstChild("RemoteEvent") then
-			local remoteEvent = cuffs.RemoteEvent
-			for _, targetPlayer in ipairs(Players:GetPlayers()) do
-				if targetPlayer ~= localPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Head") then
-					local args = {
-						[1] = "Cuff",
-						[2] = targetPlayer.Character.Head
-					}
-					local success, err = pcall(function()
-						remoteEvent:FireServer(unpack(args))
-					end)
-					if not success then
-						warn("Error firing RemoteEvent for:", targetPlayer.Name, err)
-					end
-					wait(0.1) -- 요청이 서버에서 처리되도록 지연
-				end
+	local cuffs = findPlayerWithCuffs()
+	if not cuffs or not cuffs:FindFirstChild("RemoteEvent") then
+		print("No player with handcuffs or RemoteEvent found.")
+		return
+	end
+
+	local remote = cuffs.RemoteEvent
+	for _, target in ipairs(Players:GetPlayers()) do
+		local head = target.Character and target.Character:FindFirstChild("Head")
+		if target ~= localPlayer and head then
+			local success, err = pcall(remote.FireServer, remote, "Cuff", head)
+			if not success then
+				warn("Error firing RemoteEvent for:", target.Name, err)
 			end
-		else
-			print("Player with cuffs does not have the RemoteEvent.")
+			task.wait(0.1)
 		end
-	else
-		print("No player with handcuffs found.")
 	end
 end
 
@@ -2146,7 +1968,6 @@ local Toggle_ACS_Block = Tab2:CreateToggle({
 		end
 	end,
 })
-local ACS_Kill_Name
 
 local Input_ACS_X = Tab2:CreateInput({
 	Name = "X",
@@ -2194,19 +2015,6 @@ local Button_ACS_ALL_KILL = Tab2:CreateButton({
 	Callback = function()
 		showMessage("All Kill")
 		ACS_ALL_KILL()
-	end
-})
-
-local Button_ACS_ALL_KILL = Tab2:CreateButton({
-	Name = "ACS Select Kill (개발중)",
-	Callback = function()
-	end
-})
-local ACS_Select_Kill = Tab2:CreateInput({
-	Name = "죽일 플레이어 이름",
-	PlaceholderText = "죽일 플레이어 이름 입력",
-	Callback = function(text)
-		ACS_Kill_Name = findPlayerDisplayName(text) -- 입력받는 텍스트 사용
 	end
 })
 
@@ -2270,43 +2078,6 @@ local Input_peng_Cuff_Name = Tab2:CreateInput({
 	PlaceholderText = "죽일 플레이어 이름 입력",
 	Callback = function(text)
 		CE_EX_target = findPlayerDisplayName(text) -- 입력받는 텍스트 사용
-	end
-})
-
----- 프리즌 라이프, 에임봇 ----
-local Tab11 = Window:CreateTab("프리즌 라이프 & 에임봇")
-
-Tab11:CreateSection("프리즌 라이프")
-
-Tab11:CreateButton({
-	Name = "AK-47 Get",
-	Callback = function()
-		showMessage("AK-47 Get")
-		teleport_f()
-	end
-})
-
-Tab11:CreateButton({
-	Name = "서버 터뜨리기 [AK들고 실행 후에 꾹 누르면 터짐]",
-	Callback = function()
-		showMessage("Kick_Server")
-		Kick_Server()
-	end
-})
-
-Tab11:CreateToggle({
-	Name = "All Kill",
-	Flag = "Toggle",
-	Callback = function(Value)
-		showMessage("All Kill : " .. tostring(Value))
-		attackAllPlayers(Value)
-	end
-})
-
-Tab11:CreateButton({
-	Name = "Aimbot [만들었는데 없어짐 ㅇㅂㅇ]",
-	Callback = function()
-		showMessage("Aimbot이 실행 될까말까")
 	end
 })
 
@@ -2451,49 +2222,8 @@ local Section3_4 = Tab3:CreateSection("스카이 부대")
 local SKY_allkill = Tab3:CreateButton({
 	Name = "ALL KILL [K2 필요]",
 	Callback = function()
-		sky_killall
+		sky_killall()
 		showMessage("ALL KILL")
 	end-- 함수 채우기
 })
----------------------- 스크립트 모음 탭 4 ------------------------
-local Tab4 = Window:CreateTab("스크립트 모음") -- 'Tab' 변수에 새 탭을 생성
-
--- 섹션 1: 스크립트
-local Section4_1 = Tab4:CreateSection("스크립트")
-
-local Button_script_Debugger = Tab4:CreateButton({
-	Name = "Debugger Script",
-	Callback = function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/yofriendfromschool1/debugnation/main/decompilers%20and%20debugging/Debuggers.txt"))()
-	end-- 함수 채우기
-})
-
-local Button_script_Debugger = Tab4:CreateButton({
-	Name = "Debugger Script",
-	Callback = function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/yofriendfromschool1/debugnation/main/decompilers%20and%20debugging/Debuggers.txt"))()
-	end-- 함수 채우기
-})
-
-local Button_script_Debugger = Tab4:CreateButton({
-	Name = "Debugger Script",
-	Callback = function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/yofriendfromschool1/debugnation/main/decompilers%20and%20debugging/Debuggers.txt"))()
-	end-- 함수 채우기
-})
-
-local Button_script_Debugger = Tab4:CreateButton({
-	Name = "Debugger Script",
-	Callback = function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/yofriendfromschool1/debugnation/main/decompilers%20and%20debugging/Debuggers.txt"))()
-	end -- 함수 채우기
-})
-
-local Button_script_Debugger = Tab4:CreateButton({
-	Name = "Debugger Script",
-	Callback = function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/yofriendfromschool1/debugnation/main/decompilers%20and%20debugging/Debuggers.txt"))()
-	end -- 함수 채우기
-})
-
 ArrayField:LoadConfiguration()
