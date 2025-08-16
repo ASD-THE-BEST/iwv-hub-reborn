@@ -2,6 +2,8 @@
 
 -- 1.0 change log : 스카이부대 추가(올킬), 팽부대 추가(올킬), ACS벽설치 v2추가
 
+-- 1.1 change log : ACS all kill rewrite(안티치트 걸리던거 없애고 아예 새로), ACS소리테러,ACS화면테러
+
 local ArrayField = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/ArrayField/main/Source.lua'))()
 getgenv().SecureMode = true
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -19,64 +21,62 @@ local Window = Rayfield:CreateWindow({
 	KeySettings = {
 		Title = "IWV hub Reborn",
 		Subtitle = "Key System",
-		Note = "Credit to IWV key : 12345678",
+		Note = "Credit to IWV key : 69",
 		FileName = "Key",
 		SaveKey = false,
 		GrabKeyFromSite = false,
 		Key = {
-			[1] = "12345678"
+			[1] = "69"
 		}
 	}
 })
 ---------------------- 기본기능 함수 모음 -----------------------
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local Player = Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-local camera = workspace.CurrentCamera
+Players = game:GetService("Players")
+UserInputService = game:GetService("UserInputService")
+Player = Players.LocalPlayer
+ReplicatedStorage = game:GetService("ReplicatedStorage")
+RunService = game:GetService("RunService")
+camera = workspace.CurrentCamera
 -- 밥밥 탈옥 무력화 --
-local lineObject = game:GetService("ReplicatedStorage"):FindFirstChild("line")
-
-if lineObject then
-	lineObject:Destroy()
+if game:GetService("ReplicatedStorage"):FindFirstChild("line") then
+	game:GetService("ReplicatedStorage"):FindFirstChild("line"):Destroy()
 end
 -- 밥밥 탈옥 무력화 --
 
 -- 플래그 및 상태 변수
-local isKeyValid = false
-local dragging = false
+isKeyValid = false
+dragging = false
 local dragInput, mousePos, framePos
-local teleporting = false
-local isFlying = false
-local spinSpeed = 2
-local flySpeed = 2
-local spinning = false
-local noclip = false
-local userName = ""
-local espEnabled = false
-local espObjects = {}
+teleporting = false
+isFlying = false
+spinSpeed = 2
+flySpeed = 2
+spinning = false
+noclip = false
+userName = ""
+espEnabled = false
+espObjects = {}
 
 -- 기능 플래그
-local CurrentValue = false
-local flyEnabled = false
-local noclipEnabled = false
-local spinEnabled = false
-local KillAuraEnabled = false
-local AimBotEnabled = false
-local StaticCuffEnabled = false
-local TpKillEnabled = false
-local swordAttackEnabled = false -- swordattack 기능 상태
-local increaseSize = false -- 작대기 크기 증가 상태
-local swordEquipEnabled = false  -- 검 꺼내기 상태
-local swordSizeIncreaseEnabled = false  -- 검 크기 키우기 상태
+CurrentValue = false
+flyEnabled = false
+noclipEnabled = false
+spinEnabled = false
+KillAuraEnabled = false
+AimBotEnabled = false
+StaticCuffEnabled = false
+TpKillEnabled = false
+swordAttackEnabled = false -- swordattack 기능 상태
+increaseSize = false -- 작대기 크기 증가 상태
+swordEquipEnabled = false  -- 검 꺼내기 상태
+swordSizeIncreaseEnabled = false  -- 검 크기 키우기 상태
 
 -- Aimbot 관련 변수
-local aimAssistEnabled = false
-local currentTarget = nil
+aimAssistEnabled = false
+currentTarget = nil
 local renderSteppedConnection
-local frame = nil
-local uiStroke = nil
+frame = nil
+uiStroke = nil
 local colors = {
 	Color3.fromRGB(255, 0, 0),
 	Color3.fromRGB(255, 165, 0),
@@ -1033,55 +1033,80 @@ end
 ----------------------- ACS CE -----------------------------
 
 function ACS_ALL_KILL()
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local Event = ReplicatedStorage:WaitForChild("ACS_Engine", 3).Events.AcessId
-	local Players = game:GetService("Players")
-	local key = Event:InvokeServer(Players.LocalPlayer.UserId) .. "-" .. tostring(Players.LocalPlayer.UserId)
-	local gun = game:FindFirstChild("ACS_Settings", true).Parent
-	local module = require(gun.ACS_Settings)
-	for idx, plr in pairs(Players:GetPlayers()) do
-		if plr ~= Players.LocalPlayer then
-			Event:InvokeServer(gun, plr.Character.Humanoid, 25, 1, module, {
-				minDamageMod = 150,
-				DamageMod = 150
-			}, nil, nil, key)
+	for _, p in pairs(game:GetService("Players"):GetPlayers()) do
+		if p ~= game.Players.LocalPlayer and p.Character and p.Character:FindFirstChildOfClass("Humanoid") then
+			for _, g in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+				if g:IsA("Tool") and g:FindFirstChild("ACS_Settings") then
+					game:GetService("ReplicatedStorage").ACS_Engine.Events.Damage:InvokeServer(
+					g,
+					p.Character:FindFirstChildOfClass("Humanoid"),
+					1,
+					1,
+					require(g.ACS_Settings),
+					{
+						camRecoilMod = {
+							RecoilTilt = 1,
+							RecoilUp = 1,
+							RecoilLeft = 1,
+							RecoilRight = 1
+						},
+						gunRecoilMod = {
+							RecoilUp = 1,
+							RecoilTilt = 1,
+							RecoilLeft = 1,
+							RecoilRight = 1
+						},
+						ZoomValue = 70,
+						Zoom2Value = 70,
+						AimRM = 1,
+						SpreadRM = 1,
+						DamageMod = 5,
+						minDamageMod = 5,
+						MinRecoilPower = 1,
+						MaxRecoilPower = 1,
+						RecoilPowerStepAmount = 1,
+						MinSpread = 1,
+						MaxSpread = 1,
+						AimInaccuracyStepAmount = 1,
+						AimInaccuracyDecrease = 1,
+						WalkMult = 1,
+						adsTime = 1,
+						MuzzleVelocity = 1
+					},
+					nil,
+					nil,
+					game:GetService("ReplicatedStorage").ACS_Engine.Events.AcessId:InvokeServer(game.Players.LocalPlayer.UserId) .. "-" .. game.Players.LocalPlayer.UserId
+				)
+				end
+			end
 		end
 	end
 end
 
--- 마우스 클릭 이벤트를 저장할 변수
 local ACS_mouseClick_Breach
 
--- 마우스 클릭 이벤트 활성화 함수
 function ACS_Click_Breach_ON(ACS_X, ACS_Y, ACS_Z)
-    -- 로컬 플레이어 가져오기
 	local Player = game:GetService("Players").LocalPlayer
 	local Mouse = Player:GetMouse()
-    
-    -- 블록 설치를 요청하는 원격 함수 가져오기
 	local PlaceBlockRemote = game:GetService("ReplicatedStorage"):WaitForChild("ACS_Engine"):WaitForChild("Events"):WaitForChild("Breach")
 	if not ACS_mouseClick_Breach then  -- 이미 연결되어 있는지 확인
 		ACS_mouseClick_Breach = Mouse.Button1Down:Connect(function()
-            -- 클릭 위치 정보 가져오기
 			local clickPosition = Mouse.Hit.p
 			Player.Character.ACS_Client.Kit.Fortifications.Value = 1000
-            -- 숫자 변환 (형변환 실패 시 기본값 1 설정)
 			local x = tonumber(ACS_X) or 10
 			local y = tonumber(ACS_Y) or 10
 			local z = tonumber(ACS_Z) or 10
-
-            -- 서버에 블록 설치 요청 보내기
 			local args = {
-				[1] = 3, -- 모드 (예: 설치 모드 ID)
-				[2] = { -- BreachPlace 객체 생성
+				[1] = 3,
+				[2] = {
 					Fortified = {
 						Value = true
 					},
 					Destroyable = workspace
 				},
-				[3] = clickPosition, -- 클릭 위치 사용
+				[3] = clickPosition,
 				[4] = nil,
-				[5] = { -- Hit 객체 생성 (예시)
+				[5] = {
 					Size = Vector3.new(x, y, z),
 					CFrame = CFrame.new(clickPosition)
 				}
@@ -1728,7 +1753,17 @@ end
 function Toggle_Tebi_tool_giver_f()
 	local player = game.Players.LocalPlayer
 	local added = {}
-	local toolNames = {["NULL"]=true, ["엘더플레임 AK74"]=true, ["프로토타입 AK12"]=true, ["관통기"]=true, ["프로토타입-S"]=true, ["새해 K2"]=true, ["프라임 벤달"]=true, ["스피커 K2"]=true, ["외교부 키"]=true}
+	local toolNames = {
+		["NULL"] = true,
+		["엘더플레임 AK74"] = true,
+		["프로토타입 AK12"] = true,
+		["관통기"] = true,
+		["프로토타입-S"] = true,
+		["새해 K2"] = true,
+		["프라임 벤달"] = true,
+		["스피커 K2"] = true,
+		["외교부 키"] = true
+	}
 
 	for _, tool in pairs(game:GetDescendants()) do
 		if tool:IsA("Tool") and toolNames[tool.Name] and not added[tool.Name] then
@@ -1977,7 +2012,7 @@ local Input_ACS_X = Tab2:CreateInput({
 		ACS_X = text -- 입력받는 텍스트 사용
 	end
 })
-local Input_ACS_Y = Tab2:CreateInput({
+Input_ACS_Y = Tab2:CreateInput({
 	Name = "Y",
 	RemoveTextAfterFocusLost = false,
 	PlaceholderText = "Enter Y here (높이)",
@@ -1985,37 +2020,73 @@ local Input_ACS_Y = Tab2:CreateInput({
 		ACS_Y = text -- 입력받는 텍스트 사용
 	end
 })
-local Input_ACS_Z = Tab2:CreateInput({
+Input_ACS_Z = Tab2:CreateInput({
 	Name = "Z",
 	RemoveTextAfterFocusLost = false,
 	PlaceholderText = "Enter Z here (세로)",
 	Callback = function(text)
-		ACS_Z = text -- 입력받는 텍스트 사용
+		ACS_Z = text
 	end
 })
 
-local Button_ACS_Player_fill = Tab2:CreateButton({
+Button_ACS_Player_fill = Tab2:CreateButton({
 	Name = "ACS 모든 플레이어 내보내기 (벽 설치)",
 	Callback = function()
-		showMessage("ACS_All_Breach")
+		showMessage("헤헤")
 		ACS_Player_fli()
 	end
 })
 
-local Button_ACS_Player_fill = Tab2:CreateButton({
+Button_ACS_Player_fill = Tab2:CreateButton({
 	Name = "ACS 모든 플레이어 내보내기2 (벽 설치)",
 	Callback = function()
-		showMessage("ACS_All_Breach")
+		showMessage("벽 소환!!")
 		ACS_Player_fli2()
 	end
 })
 
-local Button_ACS_ALL_KILL = Tab2:CreateButton({
-	Name = "ACS ALL Kill",
+ACS_whizz = Tab2:CreateToggle({
+	Name = "ACS 소리테러",
+	CurrentValue = false,
+	Flag = "Toggle",
+	Callback = function(aO)
+		getgenv().importantshit = aO
+		while true do
+			task.wait()
+			for a, b in pairs(game.Players:GetPlayers()) do
+				game.ReplicatedStorage.ACS_Engine.Events.Whizz:FireServer(b)
+			end
+			if not getgenv().importantshit then
+				break
+			end
+		end
+	end,
+})
+
+Button_ACS_ALL_KILL = Tab2:CreateButton({
+	Name = "ACS ALL Kill [총 필요 버그 많음]",
 	Callback = function()
 		showMessage("All Kill")
 		ACS_ALL_KILL()
 	end
+})
+
+ACS_screen = Tab2:CreateToggle({
+	Name = "ACS 화면테러(약)",
+	CurrentValue = false,
+	Flag = "Toggle",
+	Callback = function(iaaaaa)
+		getgenv().lemon = iaaaaa
+		while true do
+			task.wait()
+			for a, b in pairs(game.Players:GetChildren()) do
+				game.ReplicatedStorage.ACS_Engine.Events.Suppression:FireServer(b, 1)
+			end
+			if not getgenv().lemon then
+				break
+			end
+		end
+	end,
 })
 
 -- 섹션 1: 
@@ -2077,14 +2148,13 @@ local Input_peng_Cuff_Name = Tab2:CreateInput({
 	Name = "죽일 플레이어 이름",
 	PlaceholderText = "죽일 플레이어 이름 입력",
 	Callback = function(text)
-		CE_EX_target = findPlayerDisplayName(text) -- 입력받는 텍스트 사용
+		CE_EX_target = findPlayerDisplayName(text)
 	end
 })
 
 ---------------------- 부대 스크립트 모음 탭 3 ------------------------
-local Tab3 = Window:CreateTab("부대 스크립트 모음") -- 'Tab' 변수에 새 탭을 생성
+local Tab3 = Window:CreateTab("부대 스크립트 모음")
 
--- 섹션 1: 랭부대
 local Section3_1 = Tab3:CreateSection("랭 부대")
 
 local Button_Lang_ALL_Cuff = Tab3:CreateButton({
