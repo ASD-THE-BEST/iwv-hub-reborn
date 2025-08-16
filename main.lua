@@ -1,4 +1,7 @@
 -- love you iwv
+
+-- 1.0 change log : 스카이부대 추가(올킬), 팽부대 추가(올킬), ACS벽설치 v2추가
+
 local ArrayField = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/ArrayField/main/Source.lua'))()
 getgenv().SecureMode = true
 
