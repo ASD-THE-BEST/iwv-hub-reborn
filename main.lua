@@ -4,12 +4,17 @@
 
 -- 1.1 change log : ACS all kill rewrite(안티치트 걸리던거 없애고 아예 새로), ACS소리테러,ACS화면테러
 
+-- 1.2 change log : 작동 안하는 벽 설치해서 올킬 삭제 : 새로운 방식의 벽 설치 추가, UI 개선, 가독성 개선, ClickTP 툴 추가, ACS 핑핵 추가, 속도 추가, 점프파워 추가, Rejoin 추가, chatspammer 추가
+
 local ArrayField = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/ArrayField/main/Source.lua'))()
 getgenv().SecureMode = true
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
 	Name = "IWV Hub Reborn",
+	Icon = "code",
+	ShowText = "IWV",
+	Theme = "Amethyst",
 	LoadingTitle = "IWV..",
 	LoadingSubtitle = "by songminseo123",
 	ConfigurationSaving = {
@@ -21,7 +26,7 @@ local Window = Rayfield:CreateWindow({
 	KeySettings = {
 		Title = "IWV hub Reborn",
 		Subtitle = "Key System",
-		Note = "Credit to IWV key : 69",
+		Note = "Credit to IWV & community\nkey : 69",
 		FileName = "Key",
 		SaveKey = false,
 		GrabKeyFromSite = false,
@@ -32,51 +37,16 @@ local Window = Rayfield:CreateWindow({
 })
 ---------------------- 기본기능 함수 모음 -----------------------
 Players = game:GetService("Players")
-UserInputService = game:GetService("UserInputService")
 Player = Players.LocalPlayer
 ReplicatedStorage = game:GetService("ReplicatedStorage")
-RunService = game:GetService("RunService")
-camera = workspace.CurrentCamera
--- 밥밥 탈옥 무력화 --
+
 if game:GetService("ReplicatedStorage"):FindFirstChild("line") then
 	game:GetService("ReplicatedStorage"):FindFirstChild("line"):Destroy()
 end
--- 밥밥 탈옥 무력화 --
 
--- 플래그 및 상태 변수
-isKeyValid = false
-dragging = false
 local dragInput, mousePos, framePos
-teleporting = false
-isFlying = false
-spinSpeed = 2
-flySpeed = 2
-spinning = false
-noclip = false
-userName = ""
-espEnabled = false
-espObjects = {}
-
--- 기능 플래그
-CurrentValue = false
-flyEnabled = false
-noclipEnabled = false
-spinEnabled = false
-KillAuraEnabled = false
-AimBotEnabled = false
-StaticCuffEnabled = false
-TpKillEnabled = false
-swordAttackEnabled = false -- swordattack 기능 상태
-increaseSize = false -- 작대기 크기 증가 상태
-swordEquipEnabled = false  -- 검 꺼내기 상태
-swordSizeIncreaseEnabled = false  -- 검 크기 키우기 상태
-
--- Aimbot 관련 변수
-aimAssistEnabled = false
-currentTarget = nil
+local SpamTextttttt
 local renderSteppedConnection
-frame = nil
-uiStroke = nil
 local colors = {
 	Color3.fromRGB(255, 0, 0),
 	Color3.fromRGB(255, 165, 0),
@@ -86,17 +56,45 @@ local colors = {
 	Color3.fromRGB(128, 0, 128),
 	Color3.fromRGB(0, 0, 0)
 }
-local baseSize = 100
-local sizeIncrement = 50
-local currentColorIndex = 1
-
 local ToggleFly, ToggleNoclip, ToggleESP, ToggleSpin, ToggleKillAura, ToggleAimBot, ToggleStaticCuff, ToggleTpKill
 local ToggleWeaponSize, ToggleSwordAttack
+isKeyValid = false
+dragging = false
+teleporting = false
+isFlying = false
+spinSpeed = 2
+flySpeed = 2
+Speedy = 35
+defaultSpeeddddddd = Player.Character.Humanoid.WalkSpeed
+Jumppy = 60
+defaultJumppyyyyy = Player.Character.Humanoid.JumpPower
+spinning = false
+noclip = false
+userName = ""
+espEnabled = false
+espObjects = {}
+CurrentValue = false
+flyEnabled = false
+noclipEnabled = false
+spinEnabled = false
+KillAuraEnabled = false
+AimBotEnabled = false
+StaticCuffEnabled = false
+TpKillEnabled = false
+swordAttackEnabled = false
+increaseSize = false
+swordEquipEnabled = false
+swordSizeIncreaseEnabled = false
+aimAssistEnabled = false
+currentTarget = nil
+frame = nil
+uiStroke = nil
+baseSize = 100
+sizeIncrement = 50
+currentColorIndex = 1
 
--- 함수: 유저 ID나 유저 닉네임의 일부를 통해 플레이어의 디스플레이 닉네임을 찾습니다.
 local function findPlayerDisplayName(identifier)
 	for _, player in ipairs(Players:GetPlayers()) do
-        -- 유저 닉네임의 일부로 검색 (identifier가 문자열일 때)
 		if string.find(string.lower(player.Name), string.lower(identifier)) then
 			return player.Name
 		end
@@ -115,7 +113,7 @@ local function sky_killall()
 				0,
 				false
 			}
-			game.Players.LocalPlayer.Character:WaitForChild("K2"):WaitForChild("GunScript_Server"):WaitForChild("InflictTarget"):FireServer(unpack(args))
+			Player.Character:WaitForChild("K2"):WaitForChild("GunScript_Server"):WaitForChild("InflictTarget"):FireServer(unpack(args))
 		end
 	end
 end
@@ -170,19 +168,12 @@ end
 
 ------------------------ 프리즌 라이프 -------------------------------
 --------------------------------------- 은신 기능 ----------------------------------------------------
--- 서비스와 플레이어 참조
-local runService = game:GetService("RunService")
-local userInputService = game:GetService("UserInputService")
-local localPlayer = game.Players.LocalPlayer
-local camera = workspace.CurrentCamera
 
 function Transparency_toggle_bt(value)
-    --Settings:
 	local ScriptStarted = false
-	local Keybind = "H" --Set to whatever you want, has to be the name of a KeyCode Enum.
-	local Transparency = true --Will make you slightly transparent when you are invisible. No reason to disable.
-	local NoClip = false --Will make your fake character no clip.
-	local Player = game:GetService("Players").LocalPlayer
+	local Keybind = "H"
+	local Transparency = true
+	local NoClip = false
 	local RealCharacter = Player.Character or Player.CharacterAdded:Wait()
 	local IsInvisible = false
 	RealCharacter.Archivable = true
@@ -191,7 +182,7 @@ function Transparency_toggle_bt(value)
 	Part = Instance.new("Part", workspace)
 	Part.Anchored = true
 	Part.Size = Vector3.new(200, 1, 200)
-	Part.CFrame = CFrame.new(0, -500, 0) --Set this to whatever you want, just far away from the map.
+	Part.CFrame = CFrame.new(0, -500, 0)
 	Part.CanCollide = true
 	FakeCharacter.Parent = workspace
 	FakeCharacter.HumanoidRootPart.CFrame = Part.CFrame * CFrame.new(0, 5, 0)
@@ -224,7 +215,7 @@ function Transparency_toggle_bt(value)
 		Part = Instance.new("Part", workspace)
 		Part.Anchored = true
 		Part.Size = Vector3.new(200, 1, 200)
-		Part.CFrame = CFrame.new(9999, 9999, 9999) --Set this to whatever you want, just far away from the map.
+		Part.CFrame = CFrame.new(9999, 9999, 9999)
 		Part.CanCollide = true
 		FakeCharacter.Parent = workspace
 		FakeCharacter.HumanoidRootPart.CFrame = Part.CFrame * CFrame.new(0, 5, 0)
@@ -254,7 +245,7 @@ function Transparency_toggle_bt(value)
 	end)
 	Player.CharacterAppearanceLoaded:Connect(RealCharacterDied)
 	local PseudoAnchor
-	game:GetService "RunService".RenderStepped:Connect(
+	game:GetService("RunService").RenderStepped:Connect(
     function()
 		if PseudoAnchor ~= nil then
 			PseudoAnchor.CFrame = Part.CFrame * CFrame.new(0, 5, 0)
@@ -301,11 +292,12 @@ function Transparency_toggle_bt(value)
 		if gamep then
 			return
 		end
-		if key.KeyCode.Name:lower() == Keybind:lower() and CanInvis and RealCharacter and FakeCharacter then
+		if tostring(key.KeyCode):lower() == Keybind:lower() and CanInvis and RealCharacter and FakeCharacter then
 			if RealCharacter:FindFirstChild("HumanoidRootPart") and FakeCharacter:FindFirstChild("HumanoidRootPart") then
 				Invisible()
 			end
 		end
+
 	end
     )
 	local Sound = Instance.new("Sound", game:GetService("SoundService"))
@@ -319,14 +311,11 @@ function Transparency_toggle_bt(value)
 	})
 end
 --------------------------------------- 은신 기능 ----------------------------------------------------
---kill용 은신
 function Transparency_toggle_bt_kill()
-    --Settings:
 	local ScriptStarted = false
-	local Keybind = "H" --Set to whatever you want, has to be the name of a KeyCode Enum.
-	local Transparency = true --Will make you slightly transparent when you are invisible. No reason to disable.
-	local NoClip = false --Will make your fake character no clip.
-	local Player = game:GetService("Players").LocalPlayer
+	local Keybind = "H"
+	local Transparency = true
+	local NoClip = false
 	local RealCharacter = Player.Character or Player.CharacterAdded:Wait()
 	local IsInvisible = false
 	RealCharacter.Archivable = true
@@ -335,7 +324,7 @@ function Transparency_toggle_bt_kill()
 	Part = Instance.new("Part", workspace)
 	Part.Anchored = true
 	Part.Size = Vector3.new(200, 1, 200)
-	Part.CFrame = CFrame.new(0, -1000, 0) --Set this to whatever you want, just far away from the map.
+	Part.CFrame = CFrame.new(0, -1000, 0)
 	Part.CanCollide = true
 	FakeCharacter.Parent = workspace
 	FakeCharacter.HumanoidRootPart.CFrame = Part.CFrame * CFrame.new(0, 5, 0)
@@ -398,7 +387,7 @@ function Transparency_toggle_bt_kill()
 	end)
 	Player.CharacterAppearanceLoaded:Connect(RealCharacterDied)
 	local PseudoAnchor
-	game:GetService "RunService".RenderStepped:Connect(
+	game:GetService("RunService").RenderStepped:Connect(
     function()
 		if PseudoAnchor ~= nil then
 			PseudoAnchor.CFrame = Part.CFrame * CFrame.new(0, 5, 0)
@@ -466,8 +455,6 @@ end
 ---------------------- 특정 플레이어 날리기 --------------------
 -- 메인 함수 정의
 function Select_Fling_Player(username)
-	local Players = game:GetService("Players")
-	local Player = Players.LocalPlayer
 	local AllBool = false
 	local function Message(_Title, _Text, Time)
 		game:GetService("StarterGui"):SetCore("SendNotification", {
@@ -645,11 +632,7 @@ function Select_Fling_Player(username)
 end
 ---------------------- ESP 기능 ------------------------
 -- 서비스 및 변수 설정
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
-
-local Player = Players.LocalPlayer
 local espEnabled = false
 local espTransparency = 0.3
 local espObjects = {}
@@ -742,7 +725,7 @@ local function createESP(plr)
 			end
 
             -- RenderStepped에서 ESP 업데이트 루프 실행
-			local espLoopFunc = RunService.RenderStepped:Connect(updateESP)
+			local espLoopFunc = game:GetService("RunService").RenderStepped:Connect(updateESP)
 
             -- 캐릭터가 제거될 때 ESP 및 업데이트 루프 제거
 			local function onCharacterRemoving()
@@ -952,12 +935,12 @@ local function startFlying()
 			CONTROL.E = 0
 		end
 	end
-	UserInputService.InputBegan:Connect(function(input, processed)
+	game:GetService("UserInputService").InputBegan:Connect(function(input, processed)
 		if not processed and input.UserInputType == Enum.UserInputType.Keyboard then
 			onKeyPress(input.KeyCode.Name)
 		end
 	end)
-	UserInputService.InputEnded:Connect(function(input)
+	game:GetService("UserInputService").InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.Keyboard then
 			onKeyRelease(input.KeyCode.Name)
 		end
@@ -1004,21 +987,18 @@ local function stopSpinning()
 end
 ---------------------- FLY 기능 ------------------------------
 ---------------------- Noclip 기능 ------------------------------
-local function NoclipLoop()
-	if noclip and Player.Character then
-		for _, child in pairs(Player.Character:GetDescendants()) do
-			if child:IsA("BasePart") and child.CanCollide then
-				child.CanCollide = false
-			end
-		end
-	end
-end
 
 local function setNoclip(value)
 	noclip = value
 	if noclip then
 		while noclip do
-			NoclipLoop()
+			if noclip and Player.Character then
+				for _, child in pairs(Player.Character:GetDescendants()) do
+					if child:IsA("BasePart") and child.CanCollide then
+						child.CanCollide = false
+					end
+				end
+			end
 			task.wait(0.1)
 		end
 	else
@@ -1037,7 +1017,7 @@ function ACS_ALL_KILL()
 		if p ~= game.Players.LocalPlayer and p.Character and p.Character:FindFirstChildOfClass("Humanoid") then
 			for _, g in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
 				if g:IsA("Tool") and g:FindFirstChild("ACS_Settings") then
-					game:GetService("ReplicatedStorage").ACS_Engine.Events.Damage:InvokeServer(
+					ReplicatedStorage.ACS_Engine.Events.Damage:InvokeServer(
 					g,
 					p.Character:FindFirstChildOfClass("Humanoid"),
 					1,
@@ -1075,7 +1055,7 @@ function ACS_ALL_KILL()
 					},
 					nil,
 					nil,
-					game:GetService("ReplicatedStorage").ACS_Engine.Events.AcessId:InvokeServer(game.Players.LocalPlayer.UserId) .. "-" .. game.Players.LocalPlayer.UserId
+					ReplicatedStorage.ACS_Engine.Events.AcessId:InvokeServer(game.Players.LocalPlayer.UserId) .. "-" .. game.Players.LocalPlayer.UserId
 				)
 				end
 			end
@@ -1086,9 +1066,8 @@ end
 local ACS_mouseClick_Breach
 
 function ACS_Click_Breach_ON(ACS_X, ACS_Y, ACS_Z)
-	local Player = game:GetService("Players").LocalPlayer
 	local Mouse = Player:GetMouse()
-	local PlaceBlockRemote = game:GetService("ReplicatedStorage"):WaitForChild("ACS_Engine"):WaitForChild("Events"):WaitForChild("Breach")
+	local PlaceBlockRemote = ReplicatedStorage:WaitForChild("ACS_Engine"):WaitForChild("Events"):WaitForChild("Breach")
 	if not ACS_mouseClick_Breach then  -- 이미 연결되어 있는지 확인
 		ACS_mouseClick_Breach = Mouse.Button1Down:Connect(function()
 			local clickPosition = Mouse.Hit.p
@@ -1119,14 +1098,10 @@ function ACS_Click_Breach_ON(ACS_X, ACS_Y, ACS_Z)
 	end
 end
 
--- 마우스 클릭 이벤트 비활성화 함수
 function ACS_Click_Breach_OFF()
-    -- 로컬 플레이어 가져오기
-	local Player = game:GetService("Players").LocalPlayer
 	local Mouse = Player:GetMouse()
-    
-    -- 블록 설치를 요청하는 원격 함수 가져오기
-	local PlaceBlockRemote = game:GetService("ReplicatedStorage"):WaitForChild("ACS_Engine"):WaitForChild("Events"):WaitForChild("Breach")
+
+	local PlaceBlockRemote = ReplicatedStorage:WaitForChild("ACS_Engine"):WaitForChild("Events"):WaitForChild("Breach")
 	if ACS_mouseClick_Breach then
 		ACS_mouseClick_Breach:Disconnect()
 		ACS_mouseClick_Breach = nil
@@ -1137,12 +1112,10 @@ function ACS_Click_Breach_OFF()
 end
 
 function ACS_Player_fli()
-    -- 로컬 플레이어 가져오기
-	local Player = game:GetService("Players").LocalPlayer
 	local Mouse = Player:GetMouse()
     
     -- 블록 설치를 요청하는 원격 함수 가져오기
-	local PlaceBlockRemote = game:GetService("ReplicatedStorage"):WaitForChild("ACS_Engine"):WaitForChild("Events"):WaitForChild("Breach")
+	local PlaceBlockRemote = ReplicatedStorage:WaitForChild("ACS_Engine"):WaitForChild("Events"):WaitForChild("Breach")
 
     -- 서버에 블록 설치 요청 보내기
 	local args = {
@@ -1166,7 +1139,7 @@ end
 local function ACS_Player_fli2()
 	local a = game:GetService("Players").LocalPlayer
 	local b = a:GetMouse()
-	local c = game:GetService("ReplicatedStorage"):WaitForChild("ACS_Engine"):WaitForChild("Events"):WaitForChild("Breach")
+	local c = ReplicatedStorage:WaitForChild("ACS_Engine"):WaitForChild("Events"):WaitForChild("Breach")
 	b.Button1Down:Connect(function()
 		local d = b.Hit.p
 		a.Character.ACS_Client.Kit.Fortifications.Value = 1000
@@ -1191,7 +1164,6 @@ end
 
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
 -- 로컬 플레이어와 그 캐릭터를 가져옵니다.
@@ -1216,7 +1188,6 @@ local globalConfig = {
 local Events = {}
 
 function CEKill_ALL()
-	local Players = game:GetService("Players")
 	for idx, plr in pairs(Players:GetPlayers()) do
 		if plr ~= Players.LocalPlayer then
 			Events["DamageEvent"]:FireServer(plr.Character:FindFirstChild("Humanoid"), 100000, "Torso", {
@@ -1230,9 +1201,7 @@ function CEKill_ALL()
 end
 
 function CEsetup()
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local CResource = ReplicatedStorage:WaitForChild("CarbonResource", 3)
-	local Players = game:GetService("Players")
 	Players.LocalPlayer.Character.Humanoid.Health = 0
 	task.wait(0.3)
 	for idx, remote in pairs(CResource.Events:GetChildren()) do
@@ -1344,10 +1313,6 @@ end
 
 ----------------------- ACS CE -----------------------------
 ---------------------- 부대게임, 팽부대 시작 ------------------------------
--- 팽 부대
--- 서비스 참조
-local Players = game:GetService("Players")
-local localPlayer = Players.LocalPlayer
 
 -- 수갑을 소유한 플레이어를 찾는 함수
 local function findPlayerWithCuffs()
@@ -1400,7 +1365,7 @@ local function cuffAllPlayers()
 		if cuffs and cuffs:FindFirstChild("RemoteEvent") then
 			local remoteEvent = cuffs.RemoteEvent
 			for _, targetPlayer in ipairs(Players:GetPlayers()) do
-				if targetPlayer ~= playerWithCuffs and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Head") and localPlayer ~= targetPlayer then
+				if targetPlayer ~= playerWithCuffs and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Head") and game.Players.LocalPlayer ~= targetPlayer then
 					local args = {
 						[1] = "Cuff",
 						[2] = targetPlayer.Character.Head
@@ -1441,7 +1406,6 @@ end
 ---------------------- 부대게임, 팽부대 끝 ------------------------------
 ---------------------- 부대게임, 밥밥부대 시작 ------------------------------
 -- 밥밥 부대
-local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 local teleportingStatic = false  -- Static cuff 기능의 상태를 추적하는 변수
@@ -1499,15 +1463,15 @@ local function GlockAllKill()
 								[6] = humanoidRootPart,
 								[7] = {
 									["ChargeLevel"] = 0,
-									["ExplosionEffectFolder"] = game:GetService("ReplicatedStorage").Miscs.GunVisualEffects.Common.ExplosionEffect,
-									["BloodEffectFolder"] = game:GetService("ReplicatedStorage").Miscs.GunVisualEffects.Common.BloodEffect,
-									["HitEffectFolder"] = game:GetService("ReplicatedStorage").Miscs.GunVisualEffects.Common.HitEffect,
-									["MuzzleFolder"] = game:GetService("ReplicatedStorage").Miscs.GunVisualEffects.Common.MuzzleEffect,
-									["GoreEffect"] = game:GetService("ReplicatedStorage").Miscs.GunVisualEffects.Common.GoreEffect
+									["ExplosionEffectFolder"] = ReplicatedStorage.Miscs.GunVisualEffects.Common.ExplosionEffect,
+									["BloodEffectFolder"] = ReplicatedStorage.Miscs.GunVisualEffects.Common.BloodEffect,
+									["HitEffectFolder"] = ReplicatedStorage.Miscs.GunVisualEffects.Common.HitEffect,
+									["MuzzleFolder"] = ReplicatedStorage.Miscs.GunVisualEffects.Common.MuzzleEffect,
+									["GoreEffect"] = ReplicatedStorage.Miscs.GunVisualEffects.Common.GoreEffect
 								}
 							}
 							local success, errorMessage = pcall(function()
-								game:GetService("ReplicatedStorage").Remotes.InflictTarget:InvokeServer(unpack(args))
+								ReplicatedStorage.Remotes.InflictTarget:InvokeServer(unpack(args))
 							end)
 							if not success then
 								warn("Error invoking server:", errorMessage)
@@ -1543,7 +1507,7 @@ end
 
 -- 텔레포트 함수
 local function teleportToPosition(position)
-	local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+	local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
 	local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 	humanoidRootPart.CFrame = CFrame.new(position)
 	local VirtualInputManager = game:GetService('VirtualInputManager')
@@ -1570,8 +1534,6 @@ local function adjustWeaponSize(increase)
 		end
 	end
 end
-
-local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 -- 상태 플래그
@@ -1805,8 +1767,6 @@ end
 ---------------------- 부대게임, 태비부대 ------------------------------
 ---------------------- 부대게임, 샤크부대 ------------------------------
 -- 샤크부대
-local Players = game:GetService("Players")
-local localPlayer = Players.LocalPlayer
 
 -- 수갑을 소유한 플레이어를 찾는 함수
 local function findPlayerWithCuffs()
@@ -1829,7 +1789,7 @@ local function cuffAllPlayersa()
 	local remote = cuffs.RemoteEvent
 	for _, target in ipairs(Players:GetPlayers()) do
 		local head = target.Character and target.Character:FindFirstChild("Head")
-		if target ~= localPlayer and head then
+		if target ~= game.Players.LocalPlayer and head then
 			local success, err = pcall(remote.FireServer, remote, "Cuff", head)
 			if not success then
 				warn("Error firing RemoteEvent for:", target.Name, err)
@@ -1840,20 +1800,51 @@ local function cuffAllPlayersa()
 end
 
 ---------------------- 부대게임, 샤크부대 ------------------------------
--- 메시지를 띄우기 위한 함수
+
 local function showMessage(mass)
 	Rayfield:Notify({
-		Title = "알림",  -- 알림 창의 제목
-		Content = tostring(mass) .. "이(가) 실행 되었습니다!",  -- 알림 창에 표시될 내용
-		Duration = 5,  -- 알림이 표시될 시간(초 단위)
+		Title = "IWV hub",
+		Content = tostring(mass) .. "이(가) 실행 되었습니다!",
+		Duration = 5,
+		Image = "info"
 	})
 end
 ---------------------- 기본기능 모음 탭 1 ------------------------
 local FlingUser_Name = nil
-local Tab = Window:CreateTab("Standerd Cheat") -- 'Tab' 변수에 새 탭을 생성
+local Tab = Window:CreateTab("Standerd Cheat", "user-cog")
 
--- 섹션 1: Cheat
 local Section1_1 = Tab:CreateSection("Cheat")
+local Divider = Tab:CreateDivider()
+
+local Toggle_Speed = Tab:CreateToggle({
+	Name = "WalkSpeed",
+	CurrentValue = false,
+	Flag = "Toggle",
+	Callback = function(Value)
+		if Value then
+			showMessage("Speed :" .. tostring(Value))
+			Player.Character.Humanoid.WalkSpeed = Speedy
+		else
+			showMessage("Speed :" .. tostring(Value))
+			Player.Character.Humanoid.WalkSpeed = defaultSpeeddddddd
+		end
+	end,
+})
+
+local Toggle_JumpPower = Tab:CreateToggle({
+	Name = "JumpPower",
+	CurrentValue = false,
+	Flag = "Toggle",
+	Callback = function(Value)
+		if Value then
+			showMessage("JumpPower :" .. tostring(Value))
+			Player.Character.Humanoid.JumpPower = Jumppy
+		else
+			showMessage("JumpPower :" .. tostring(Value))
+			Player.Character.Humanoid.JumpPower = defaultJumppyyyyy
+		end
+	end,
+})
 
 local Toggle_Fly = Tab:CreateToggle({
 	Name = "Fly",
@@ -1862,10 +1853,10 @@ local Toggle_Fly = Tab:CreateToggle({
 	Callback = function(Value)
 		if Value then
 			showMessage("Fly :" .. tostring(Value))
-			startFlying()-- 비행 활성화 코드
+			startFlying()
 		else
 			showMessage("Fly :" .. tostring(Value))
-			stopFlying()-- 비행 비활성화 코드
+			stopFlying()
 		end
 	end,
 })
@@ -1903,13 +1894,13 @@ local Toggle_ESP = Tab:CreateToggle({
 			showMessage("ESP : " .. tostring(Value))
 			espEnabled = true
 			while espEnabled do
-				applyESP()-- ESP 활성화 코드
+				applyESP()
 				wait(1)
 			end
 		else
 			showMessage("ESP : " .. tostring(Value))
 			espEnabled = false
-			removeESP()-- ESP 비활성화 코드
+			removeESP()
 		end
 	end,
 })
@@ -1938,7 +1929,71 @@ local Input_Fling_User = Tab:CreateInput({
 	end
 })
 
+local Rejoin_hahaha = Tab:CreateButton({
+	Name = "Rejoin",
+	Callback = function()
+		game:GetService("TeleportService"):Teleport(game.PlaceId, Player)
+	end
+})
+
+local imnotgay = Tab:CreateToggle({
+	Name = "Chat Spammer",
+	CurrentValue = false,
+	Flag = "Toggle1",
+	Callback = function(messi)
+		getgenv().bunnilol = messi
+		if not SpamTextttttt or SpamTextttttt == "" then
+			print("pls setting text first :)")
+		end
+		while true do
+			task.wait(.2)
+			if not getgenv().bunnilol then
+				break
+			end
+			game.TextChatService.TextChannels.RBXGeneral:SendAsync(SpamTextttttt)
+		end
+	end,
+})
+
+local imrealnotgay = Tab:CreateInput({
+	Name = "Spam Text",
+	RemoveTextAfterFocusLost = false,
+	PlaceholderText = "Enter Text here",
+	Callback = function(aaaaaaaaa)
+		SpamTextttttt = aaaaaaaaa
+	end
+})
+
 local Section1_2 = Tab:CreateSection("Control")
+local Divider = Tab:CreateDivider()
+
+local Input_WalkSpeed = Tab:CreateSlider({
+	Name = "WalkSpeed",
+	Range = {
+		0,
+		150
+	},
+	Increment = 1,
+	Suffix = "",
+	CurrentValue = Speedy,
+	Callback = function(value)
+		Speedy = value
+	end
+})
+
+local Input_JumpPower = Tab:CreateSlider({
+	Name = "JumpPower",
+	Range = {
+		0,
+		150
+	},
+	Increment = 1,
+	Suffix = "",
+	CurrentValue = Jumppy,
+	Callback = function(cr7)
+		Jumppy = cr7
+	end
+})
 
 local Input_FlySpeed = Tab:CreateSlider({
 	Name = "Fly Speed",
@@ -1950,8 +2005,7 @@ local Input_FlySpeed = Tab:CreateSlider({
 	Suffix = "%",
 	CurrentValue = 5,
 	Callback = function(value)
-		showMessage("Speed : " .. tostring(value))
-		flySpeed = value-- Fly speed 변경 코드
+		flySpeed = value
 	end
 })
 
@@ -1965,14 +2019,12 @@ local Input_SpinSpeed = Tab:CreateSlider({
 	Suffix = "%",
 	CurrentValue = 5,
 	Callback = function(value)
-        -- Spin speed 변경 코드
 		spinSpeed = value
 	end
 })
 
-
--- 섹션 3: Tools
 local Section1_3 = Tab:CreateSection("Tools")
+local Divider = Tab:CreateDivider()
 
 local Toggle_Transparency = Tab:CreateButton({
 	Name = "Transparency (투명 H)",
@@ -1981,11 +2033,40 @@ local Toggle_Transparency = Tab:CreateButton({
 	end
 })
 
+local Click_TP_haha = Tab:CreateButton({
+	Name = "Click TP",
+	Callback = function()
+		local a = game.Players.LocalPlayer:GetMouse()
+		local b = Instance.new("Tool")
+		b.RequiresHandle = false
+		b.Name = "Tool"
+		b.Activated:Connect(function()
+			local c = a.Hit + Vector3.new(0, 2.5, 0)
+			local d = CFrame.new(c.X, c.Y, c.Z)
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = d
+		end)
+		b.Parent = game.Players.LocalPlayer.Backpack
+	end,
+})
+
 ---------------------- ACS Engine & CE Engine 탭 2 ------------------------
-local Tab2 = Window:CreateTab("ACS Engine & CE Engine") -- 'Tab' 변수에 새 탭을 생성
+local Tab2 = Window:CreateTab("ACS Engine & CE Engine", "crosshair")
 
 -- 섹션 1: 
 local Section2_1 = Tab2:CreateSection("ACS Engine")
+local Divider = Tab2:CreateDivider()
+
+Button_ACS_check = Tab2:CreateButton({
+	Name = "ACS 체크",
+	Callback = function()
+		if not ReplicatedStorage:FindFirstChild("ACS_Engine") then
+			print("ACS 엔진이 아님")
+		end
+		if ReplicatedStorage:FindFirstChild("ACS_Engine") then
+			print("ACS 엔진이 있음")
+		end
+	end
+})
 
 local ACS_X, ACS_Y, ACS_Z
 
@@ -2032,14 +2113,6 @@ Input_ACS_Z = Tab2:CreateInput({
 Button_ACS_Player_fill = Tab2:CreateButton({
 	Name = "ACS 모든 플레이어 내보내기 (벽 설치)",
 	Callback = function()
-		showMessage("헤헤")
-		ACS_Player_fli()
-	end
-})
-
-Button_ACS_Player_fill = Tab2:CreateButton({
-	Name = "ACS 모든 플레이어 내보내기2 (벽 설치)",
-	Callback = function()
 		showMessage("벽 소환!!")
 		ACS_Player_fli2()
 	end
@@ -2054,7 +2127,7 @@ ACS_whizz = Tab2:CreateToggle({
 		while true do
 			task.wait()
 			for a, b in pairs(game.Players:GetPlayers()) do
-				game.ReplicatedStorage.ACS_Engine.Events.Whizz:FireServer(b)
+				ReplicatedStorage.ACS_Engine.Events.Whizz:FireServer(b)
 			end
 			if not getgenv().importantshit then
 				break
@@ -2063,12 +2136,43 @@ ACS_whizz = Tab2:CreateToggle({
 	end,
 })
 
-Button_ACS_ALL_KILL = Tab2:CreateButton({
-	Name = "ACS ALL Kill [총 필요 버그 많음]",
-	Callback = function()
-		showMessage("All Kill")
-		ACS_ALL_KILL()
-	end
+ACS_laggy_laggy = Tab2:CreateToggle({
+	Name = "ACS 렉",
+	CurrentValue = false,
+	Flag = "Toggle",
+	Callback = function(hahahahahahahah)
+		getgenv().SynapseX = hahahahahahahah
+		while true do
+			task.wait()
+			if not getgenv().SynapseX then
+				print("a")
+				break
+			end
+			for i = 1, getgenv().AWP_exitscam or 1 do
+				game.ReplicatedStorage.ACS_Engine.Events.Equip:FireServer(
+					{
+					["Name"] = game.ReplicatedStorage.ACS_Engine.GunModels:FindFirstChildOfClass("Model").Name
+				}, 1
+				)
+				print("b")
+			end
+		end
+	end,
+})
+
+ACS_ping_rage = Tab2:CreateSlider({
+	Name = "ACS 렉 파워",
+	Range = {
+		1,
+		100
+	},
+	Increment = 1,
+	Suffix = "",
+	CurrentValue = 1,
+	Flag = "Slider1",
+	Callback = function(hello)
+		getgenv().AWP_exitscam = hello
+	end,
 })
 
 ACS_screen = Tab2:CreateToggle({
@@ -2080,7 +2184,7 @@ ACS_screen = Tab2:CreateToggle({
 		while true do
 			task.wait()
 			for a, b in pairs(game.Players:GetChildren()) do
-				game.ReplicatedStorage.ACS_Engine.Events.Suppression:FireServer(b, 1)
+				ReplicatedStorage.ACS_Engine.Events.Suppression:FireServer(b, 1)
 			end
 			if not getgenv().lemon then
 				break
@@ -2091,6 +2195,7 @@ ACS_screen = Tab2:CreateToggle({
 
 -- 섹션 1: 
 local Section2_2 = Tab2:CreateSection("CE Engine")
+local Divider = Tab2:CreateDivider()
 
 local Button_ACS_Block = Tab2:CreateButton({
 	Name = "CE 이벤트 경로 설정 ( 반드시 먼저 하세요 )",
@@ -2153,9 +2258,10 @@ local Input_peng_Cuff_Name = Tab2:CreateInput({
 })
 
 ---------------------- 부대 스크립트 모음 탭 3 ------------------------
-local Tab3 = Window:CreateTab("부대 스크립트 모음")
+local Tab3 = Window:CreateTab("부대 스크립트 모음", "shield-ban")
 
 local Section3_1 = Tab3:CreateSection("랭 부대")
+local Divider = Tab3:CreateDivider()
 
 local Button_Lang_ALL_Cuff = Tab3:CreateButton({
 	Name = "ALL Cuff",
@@ -2190,6 +2296,7 @@ local Lang_All_Kill = Tab3:CreateButton({
 })
 
 Tab3:CreateSection("강철부대")
+local Divider = Tab2:CreateDivider()
 
 Tab3:CreateButton({
 	Name = "강철부대 All 수갑 [가까이 가야함]",
@@ -2208,6 +2315,7 @@ Tab3:CreateButton({
 
 -- 섹션 2: 밥밥 부대
 local Section3_2 = Tab3:CreateSection("밥밥 부대")
+local Divider = Tab3:CreateDivider()
 
 local Toggle_babbab_ALL_KILL = Tab3:CreateToggle({
 	Name = "글록 ALL KILL (글록필요)",
@@ -2260,6 +2368,7 @@ local Button_babbab_jak_tel = Tab3:CreateButton({
 
 -- 섹션 3: 태비 부대
 local Section3_3 = Tab3:CreateSection("태비 부대")
+local Divider = Tab3:CreateDivider()
 
 local Button_tebi_jak_give = Tab3:CreateButton({
 	Name = "모든 총 가져오기",
@@ -2279,6 +2388,7 @@ local Button_tebi_jak_vote = Tab3:CreateButton({
 
 -- 섹션 4: 샤크부대
 local Section3_4 = Tab3:CreateSection("샤크 부대")
+local Divider = Tab3:CreateDivider()
 
 local Button_Sak_ALL_Cuff = Tab3:CreateButton({
 	Name = "ALL Cuff",
@@ -2289,6 +2399,8 @@ local Button_Sak_ALL_Cuff = Tab3:CreateButton({
 })
 
 local Section3_4 = Tab3:CreateSection("스카이 부대")
+local Divider = Tab3:CreateDivider()
+
 local SKY_allkill = Tab3:CreateButton({
 	Name = "ALL KILL [K2 필요]",
 	Callback = function()
