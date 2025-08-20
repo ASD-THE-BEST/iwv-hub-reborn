@@ -1,10 +1,10 @@
--- love you iwv
-
 -- 1.0 change log : 스카이부대 추가(올킬), 팽부대 추가(올킬), ACS벽설치 v2추가
 
 -- 1.1 change log : ACS all kill rewrite(안티치트 걸리던거 없애고 아예 새로), ACS소리테러,ACS화면테러
 
 -- 1.2 change log : 작동 안하는 벽 설치해서 올킬 삭제 : 새로운 방식의 벽 설치 추가, UI 개선, 가독성 개선, ClickTP 툴 추가, ACS 핑핵 추가, 속도 추가, 점프파워 추가, Rejoin 추가, chatspammer 추가
+
+-- [[2.0 change log : [+] 서울부대 : Select Loopkill,Loopkill all,SelectKill,AllKill(총 필요 없음),All LoopKill(총 필요 없음),Select LoopKill(총 X), Select Kill(총 X), [+] 팽 부대 : All LoopKill,Select Kill,Select LoopKill, [+] 성능 최적화들, [-] 서울부대가 ESP를 바꾸지도 않았는데 감지함(CoreGUI같은데 어떻게 감지? 최대한 고쳐봄)
 
 local ArrayField = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/ArrayField/main/Source.lua'))()
 getgenv().SecureMode = true
@@ -68,6 +68,7 @@ Speedy = 35
 defaultSpeeddddddd = Player.Character.Humanoid.WalkSpeed
 Jumppy = 60
 defaultJumppyyyyy = Player.Character.Humanoid.JumpPower
+mysoul = nil
 spinning = false
 noclip = false
 userName = ""
@@ -79,6 +80,7 @@ noclipEnabled = false
 spinEnabled = false
 KillAuraEnabled = false
 AimBotEnabled = false
+hahaha = nil
 StaticCuffEnabled = false
 TpKillEnabled = false
 swordAttackEnabled = false
@@ -92,6 +94,7 @@ uiStroke = nil
 baseSize = 100
 sizeIncrement = 50
 currentColorIndex = 1
+fanggggggggggggggggggggggggg = nil
 
 local function findPlayerDisplayName(identifier)
 	for _, player in ipairs(Players:GetPlayers()) do
@@ -100,20 +103,11 @@ local function findPlayerDisplayName(identifier)
 		end
 	end
 end
------------------------- 스카이 부대 ----------------------------
-local function sky_killall()
-	for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
-		if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("Humanoid") and player.Character:FindFirstChild("HumanoidRootPart") then
-			local args = {
-				player.Character.Humanoid,
-				player.Character.HumanoidRootPart,
-				69697474,
-				Vector3.new(0, -1, 0),
-				0,
-				0,
-				false
-			}
-			Player.Character:WaitForChild("K2"):WaitForChild("GunScript_Server"):WaitForChild("InflictTarget"):FireServer(unpack(args))
+
+local function findPlayerDisplayName2(identifier)
+	for _, player in ipairs(Players:GetPlayers()) do
+		if string.find(string.lower(player.Name), string.lower(identifier)) then
+			return player
 		end
 	end
 end
@@ -631,28 +625,24 @@ function Select_Fling_Player(username)
 	end
 end
 ---------------------- ESP 기능 ------------------------
--- 서비스 및 변수 설정
 local CoreGui = game:GetService("CoreGui")
 local espEnabled = false
 local espTransparency = 0.3
 local espObjects = {}
 
--- 캐릭터의 루트 파트를 가져오는 함수
 local function getRoot(character)
 	return character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("Head")
 end
 
--- 숫자를 반올림하는 함수
 local function round(num, numDecimalPlaces)
 	local mult = 10 ^ (numDecimalPlaces or 0)
 	return math.floor(num * mult + 0.5) / mult
 end
 
--- 플레이어에 대한 ESP를 생성하는 함수
 local function createESP(plr)
 	if plr == Player then
 		return
-	end -- 자기 자신에 대한 ESP는 생성하지 않음
+	end
 	local function setupESP()
 		local character = plr.Character
 		if not character or not character:FindFirstChild("Humanoid") then
@@ -672,7 +662,6 @@ local function createESP(plr)
 		ESPholder.Parent = CoreGui
 		espObjects[plr.UserId] = ESPholder
 
-        -- 캐릭터의 각 파트에 대해 ESP 박스 생성
 		for _, part in pairs(character:GetChildren()) do
 			if part:IsA("BasePart") then
 				local adornment = Instance.new("BoxHandleAdornment")
@@ -686,8 +675,6 @@ local function createESP(plr)
 				adornment.Color3 = plr.TeamColor.Color
 			end
 		end
-
-        -- 캐릭터의 머리 위에 텍스트 GUI 생성
 		local head = character:FindFirstChild("Head")
 		if head then
 			local BillboardGui = Instance.new("BillboardGui")
@@ -708,8 +695,6 @@ local function createESP(plr)
 			TextLabel.TextStrokeTransparency = 0
 			TextLabel.TextYAlignment = Enum.TextYAlignment.Bottom
 			TextLabel.Text = 'Name: ' .. plr.Name
-
-            -- ESP 업데이트 함수
 			local function updateESP()
 				if not ESPholder.Parent then
 					return
@@ -723,11 +708,7 @@ local function createESP(plr)
 					end
 				end
 			end
-
-            -- RenderStepped에서 ESP 업데이트 루프 실행
 			local espLoopFunc = game:GetService("RunService").RenderStepped:Connect(updateESP)
-
-            -- 캐릭터가 제거될 때 ESP 및 업데이트 루프 제거
 			local function onCharacterRemoving()
 				espLoopFunc:Disconnect()
 				if ESPholder.Parent then
@@ -735,16 +716,13 @@ local function createESP(plr)
 				end
 			end
 
-            -- 새 캐릭터가 추가될 때 ESP 재설정
 			local function onCharacterAdded(newCharacter)
-				setupESP() -- 새로운 캐릭터가 추가되면 ESP 재설정
+				setupESP()
 			end
 
-            -- 이벤트 연결
 			plr.CharacterRemoving:Connect(onCharacterRemoving)
 			plr.CharacterAdded:Connect(onCharacterAdded)
 
-            -- 팀 색상 변경 시 ESP 색상 업데이트
 			local function onTeamChanged()
 				for _, adornment in pairs(ESPholder:GetChildren()) do
 					if adornment:IsA("BoxHandleAdornment") then
@@ -756,16 +734,13 @@ local function createESP(plr)
 		end
 	end
 
-    -- 캐릭터가 존재할 경우 ESP 설정
 	if plr.Character then
 		setupESP()
 	end
 
-    -- 새로 추가된 캐릭터에 대해서도 ESP 설정
 	plr.CharacterAdded:Connect(setupESP)
 end
 
--- 플레이어가 떠날 때 ESP 제거
 local function removeESPForPlayer(plr)
 	local esp = espObjects[plr.UserId]
 	if esp then
@@ -774,14 +749,12 @@ local function removeESPForPlayer(plr)
 	end
 end
 
--- 모든 플레이어에 대한 ESP 설정
 local function applyESP()
 	for _, plr in pairs(Players:GetPlayers()) do
 		createESP(plr)
 	end
 end
 
--- 모든 플레이어에 대한 ESP 제거
 local function removeESP()
 	for _, esp in pairs(espObjects) do
 		if esp then
@@ -791,26 +764,22 @@ local function removeESP()
 	espObjects = {}
 end
 
--- 자신의 캐릭터가 추가될 때 모든 플레이어에게 ESP 적용
 Player.CharacterAdded:Connect(function()
 	if espEnabled then
 		applyESP()
 	end
 end)
 
--- 새로 추가된 플레이어에게 ESP 적용
 Players.PlayerAdded:Connect(function(plr)
 	if espEnabled then
 		createESP(plr)
 	end
 end)
 
--- 플레이어가 떠날 때 ESP 제거
 Players.PlayerRemoving:Connect(function(plr)
 	removeESPForPlayer(plr)
 end)
 
--- 플레이어의 캐릭터가 사망하거나 재생성될 때 ESP 업데이트
 Players.PlayerAdded:Connect(function(plr)
 	plr.CharacterAdded:Connect(function(character)
 		if espEnabled then
@@ -819,7 +788,6 @@ Players.PlayerAdded:Connect(function(plr)
 	end)
 end)
 
--- 게임 시작 시 이미 존재하는 플레이어들에게 ESP 적용
 if espEnabled then
 	applyESP()
 end
@@ -1014,8 +982,8 @@ end
 
 function ACS_ALL_KILL()
 	for _, p in pairs(game:GetService("Players"):GetPlayers()) do
-		if p ~= game.Players.LocalPlayer and p.Character and p.Character:FindFirstChildOfClass("Humanoid") then
-			for _, g in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+		if p ~= Player and p.Character and p.Character:FindFirstChildOfClass("Humanoid") then
+			for _, g in pairs(Player.Backpack:GetChildren()) do
 				if g:IsA("Tool") and g:FindFirstChild("ACS_Settings") then
 					ReplicatedStorage.ACS_Engine.Events.Damage:InvokeServer(
 					g,
@@ -1055,7 +1023,7 @@ function ACS_ALL_KILL()
 					},
 					nil,
 					nil,
-					ReplicatedStorage.ACS_Engine.Events.AcessId:InvokeServer(game.Players.LocalPlayer.UserId) .. "-" .. game.Players.LocalPlayer.UserId
+					ReplicatedStorage.ACS_Engine.Events.AcessId:InvokeServer(Player.UserId) .. "-" .. Player.UserId
 				)
 				end
 			end
@@ -1165,8 +1133,6 @@ end
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
-
--- 로컬 플레이어와 그 캐릭터를 가져옵니다.
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -1245,7 +1211,7 @@ local function CE_EX_ALL_KILL()
 	if CEset then
 		local allPlayers = Players:GetPlayers()
 		for _, p in pairs(allPlayers) do
-			if p ~= game.Players.LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+			if p ~= Player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
 				local playerPosition = p.Character.HumanoidRootPart.Position
                 -- ExplosiveEvent 발사 (전역 Events 사용)
 				if Events["ExplosiveEvent"] then
@@ -1365,7 +1331,7 @@ local function cuffAllPlayers()
 		if cuffs and cuffs:FindFirstChild("RemoteEvent") then
 			local remoteEvent = cuffs.RemoteEvent
 			for _, targetPlayer in ipairs(Players:GetPlayers()) do
-				if targetPlayer ~= playerWithCuffs and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Head") and game.Players.LocalPlayer ~= targetPlayer then
+				if targetPlayer ~= playerWithCuffs and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Head") and Player ~= targetPlayer then
 					local args = {
 						[1] = "Cuff",
 						[2] = targetPlayer.Character.Head
@@ -1384,23 +1350,6 @@ local function cuffAllPlayers()
 		end
 	else
 		print("No player with handcuffs found.")
-	end
-end
-
-local function lang_killall()
-	for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
-		if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("Humanoid") and player.Character:FindFirstChild("HumanoidRootPart") then
-			local args = {
-				player.Character.Humanoid,
-				player.Character.HumanoidRootPart,
-				69697474,
-				Vector3.new(0, -1, 0),
-				0,
-				0,
-				false
-			}
-			game.Players.LocalPlayer.Character:WaitForChild("AK-47"):WaitForChild("GunScript_Server"):WaitForChild("InflictTarget"):FireServer(unpack(args))
-		end
 	end
 end
 ---------------------- 부대게임, 팽부대 끝 ------------------------------
@@ -1507,7 +1456,7 @@ end
 
 -- 텔레포트 함수
 local function teleportToPosition(position)
-	local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+	local character = Player.Character or Player.CharacterAdded:Wait()
 	local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 	humanoidRootPart.CFrame = CFrame.new(position)
 	local VirtualInputManager = game:GetService('VirtualInputManager')
@@ -1713,7 +1662,6 @@ end
 ---------------------- 부대게임, 밥밥부대 끝 ------------------------------
 ---------------------- 부대게임, 태비부대 ------------------------------
 function Toggle_Tebi_tool_giver_f()
-	local player = game.Players.LocalPlayer
 	local added = {}
 	local toolNames = {
 		["NULL"] = true,
@@ -1789,7 +1737,7 @@ local function cuffAllPlayersa()
 	local remote = cuffs.RemoteEvent
 	for _, target in ipairs(Players:GetPlayers()) do
 		local head = target.Character and target.Character:FindFirstChild("Head")
-		if target ~= game.Players.LocalPlayer and head then
+		if target ~= Player and head then
 			local success, err = pcall(remote.FireServer, remote, "Cuff", head)
 			if not success then
 				warn("Error firing RemoteEvent for:", target.Name, err)
@@ -1813,10 +1761,10 @@ end
 local FlingUser_Name = nil
 local Tab = Window:CreateTab("Standerd Cheat", "user-cog")
 
-local Section1_1 = Tab:CreateSection("Cheat")
-local Divider = Tab:CreateDivider()
+Tab:CreateSection("Cheat")
+Tab:CreateDivider()
 
-local Toggle_Speed = Tab:CreateToggle({
+Tab:CreateToggle({
 	Name = "WalkSpeed",
 	CurrentValue = false,
 	Flag = "Toggle",
@@ -1831,7 +1779,7 @@ local Toggle_Speed = Tab:CreateToggle({
 	end,
 })
 
-local Toggle_JumpPower = Tab:CreateToggle({
+Tab:CreateToggle({
 	Name = "JumpPower",
 	CurrentValue = false,
 	Flag = "Toggle",
@@ -1846,7 +1794,7 @@ local Toggle_JumpPower = Tab:CreateToggle({
 	end,
 })
 
-local Toggle_Fly = Tab:CreateToggle({
+Tab:CreateToggle({
 	Name = "Fly",
 	CurrentValue = false,
 	Flag = "Toggle",
@@ -1861,7 +1809,7 @@ local Toggle_Fly = Tab:CreateToggle({
 	end,
 })
 
-local Toggle_Noclip = Tab:CreateToggle({
+Tab:CreateToggle({
 	Name = "Noclip",
 	CurrentValue = false,
 	Flag = "Toggle",
@@ -1871,7 +1819,7 @@ local Toggle_Noclip = Tab:CreateToggle({
 	end,
 })
 
-local Toggle_Spin = Tab:CreateToggle({
+Tab:CreateToggle({
 	Name = "Spin",
 	CurrentValue = false,
 	Flag = "Toggle",
@@ -1885,7 +1833,7 @@ local Toggle_Spin = Tab:CreateToggle({
 	end,
 })
 
-local Toggle_ESP = Tab:CreateToggle({
+Tab:CreateToggle({
 	Name = "ESP",
 	CurrentValue = false,
 	Flag = "Toggle",
@@ -1905,7 +1853,7 @@ local Toggle_ESP = Tab:CreateToggle({
 	end,
 })
 
-local Button_Kick_All = Tab:CreateButton({
+Tab:CreateButton({
 	Name = "모든 플레이어 날리기 (플레이어 끼리 통과되면 안 됨)",
 	Callback = function()
 		showMessage("Fling")
@@ -1913,14 +1861,14 @@ local Button_Kick_All = Tab:CreateButton({
 	end
 })
 
-local Button_Kick_Selcet = Tab:CreateButton({
+Tab:CreateButton({
 	Name = "특정 플레이어 날리기 (플레이어 끼리 통과되면 안 됨)",
 	Callback = function()
 		Select_Fling_Player(FlingUser_Name)
 	end
 })
 
-local Input_Fling_User = Tab:CreateInput({
+Tab:CreateInput({
 	Name = "특정 플레이어 이름",
 	RemoveTextAfterFocusLost = false,
 	PlaceholderText = "Enter UserName here",
@@ -1929,33 +1877,35 @@ local Input_Fling_User = Tab:CreateInput({
 	end
 })
 
-local Rejoin_hahaha = Tab:CreateButton({
+Tab:CreateButton({
 	Name = "Rejoin",
 	Callback = function()
 		game:GetService("TeleportService"):Teleport(game.PlaceId, Player)
 	end
 })
 
-local imnotgay = Tab:CreateToggle({
+Tab:CreateToggle({
 	Name = "Chat Spammer",
 	CurrentValue = false,
 	Flag = "Toggle1",
 	Callback = function(messi)
-		getgenv().bunnilol = messi
+		getfenv().bunnilol = messi
 		if not SpamTextttttt or SpamTextttttt == "" then
 			print("pls setting text first :)")
+			return
 		end
-		while true do
-			task.wait(.2)
-			if not getgenv().bunnilol then
-				break
-			end
-			game.TextChatService.TextChannels.RBXGeneral:SendAsync(SpamTextttttt)
+		if messi then
+			task.spawn(function()
+				while getfenv().bunnilol do
+					task.wait(.2)
+					game.TextChatService.TextChannels.RBXGeneral:SendAsync(SpamTextttttt)
+				end
+			end)
 		end
 	end,
 })
 
-local imrealnotgay = Tab:CreateInput({
+Tab:CreateInput({
 	Name = "Spam Text",
 	RemoveTextAfterFocusLost = false,
 	PlaceholderText = "Enter Text here",
@@ -1964,10 +1914,10 @@ local imrealnotgay = Tab:CreateInput({
 	end
 })
 
-local Section1_2 = Tab:CreateSection("Control")
-local Divider = Tab:CreateDivider()
+Tab:CreateSection("Control")
+Tab:CreateDivider()
 
-local Input_WalkSpeed = Tab:CreateSlider({
+Tab:CreateSlider({
 	Name = "WalkSpeed",
 	Range = {
 		0,
@@ -1981,7 +1931,7 @@ local Input_WalkSpeed = Tab:CreateSlider({
 	end
 })
 
-local Input_JumpPower = Tab:CreateSlider({
+Tab:CreateSlider({
 	Name = "JumpPower",
 	Range = {
 		0,
@@ -1995,7 +1945,7 @@ local Input_JumpPower = Tab:CreateSlider({
 	end
 })
 
-local Input_FlySpeed = Tab:CreateSlider({
+Tab:CreateSlider({
 	Name = "Fly Speed",
 	Range = {
 		0,
@@ -2009,7 +1959,7 @@ local Input_FlySpeed = Tab:CreateSlider({
 	end
 })
 
-local Input_SpinSpeed = Tab:CreateSlider({
+Tab:CreateSlider({
 	Name = "Spin Speed",
 	Range = {
 		0,
@@ -2023,40 +1973,39 @@ local Input_SpinSpeed = Tab:CreateSlider({
 	end
 })
 
-local Section1_3 = Tab:CreateSection("Tools")
-local Divider = Tab:CreateDivider()
+Tab:CreateSection("Tools")
+Tab:CreateDivider()
 
-local Toggle_Transparency = Tab:CreateButton({
+Tab:CreateButton({
 	Name = "Transparency (투명 H)",
 	Callback = function()
 		Transparency_toggle_bt(true)
 	end
 })
 
-local Click_TP_haha = Tab:CreateButton({
+Tab:CreateButton({
 	Name = "Click TP",
 	Callback = function()
-		local a = game.Players.LocalPlayer:GetMouse()
+		local a = Player:GetMouse()
 		local b = Instance.new("Tool")
 		b.RequiresHandle = false
 		b.Name = "Tool"
 		b.Activated:Connect(function()
 			local c = a.Hit + Vector3.new(0, 2.5, 0)
 			local d = CFrame.new(c.X, c.Y, c.Z)
-			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = d
+			Player.Character.HumanoidRootPart.CFrame = d
 		end)
-		b.Parent = game.Players.LocalPlayer.Backpack
+		b.Parent = Player.Backpack
 	end,
 })
 
 ---------------------- ACS Engine & CE Engine 탭 2 ------------------------
 local Tab2 = Window:CreateTab("ACS Engine & CE Engine", "crosshair")
 
--- 섹션 1: 
-local Section2_1 = Tab2:CreateSection("ACS Engine")
-local Divider = Tab2:CreateDivider()
+Tab2:CreateSection("ACS Engine")
+Tab2:CreateDivider()
 
-Button_ACS_check = Tab2:CreateButton({
+Tab2:CreateButton({
 	Name = "ACS 체크",
 	Callback = function()
 		if not ReplicatedStorage:FindFirstChild("ACS_Engine") then
@@ -2070,7 +2019,7 @@ Button_ACS_check = Tab2:CreateButton({
 
 local ACS_X, ACS_Y, ACS_Z
 
-local Toggle_ACS_Block = Tab2:CreateToggle({
+Tab2:CreateToggle({
 	Name = "ACS 블록설치 (10개만 설치가능 + 죽으면 10개로 초기화)",
 	CurrentValue = false,
 	Flag = "Toggle",
@@ -2085,7 +2034,7 @@ local Toggle_ACS_Block = Tab2:CreateToggle({
 	end,
 })
 
-local Input_ACS_X = Tab2:CreateInput({
+Tab2:CreateInput({
 	Name = "X",
 	PlaceholderText = "Enter X here (가로)",
 	RemoveTextAfterFocusLost = false,
@@ -2093,7 +2042,7 @@ local Input_ACS_X = Tab2:CreateInput({
 		ACS_X = text -- 입력받는 텍스트 사용
 	end
 })
-Input_ACS_Y = Tab2:CreateInput({
+Tab2:CreateInput({
 	Name = "Y",
 	RemoveTextAfterFocusLost = false,
 	PlaceholderText = "Enter Y here (높이)",
@@ -2101,7 +2050,7 @@ Input_ACS_Y = Tab2:CreateInput({
 		ACS_Y = text -- 입력받는 텍스트 사용
 	end
 })
-Input_ACS_Z = Tab2:CreateInput({
+Tab2:CreateInput({
 	Name = "Z",
 	RemoveTextAfterFocusLost = false,
 	PlaceholderText = "Enter Z here (세로)",
@@ -2110,7 +2059,7 @@ Input_ACS_Z = Tab2:CreateInput({
 	end
 })
 
-Button_ACS_Player_fill = Tab2:CreateButton({
+Tab2:CreateButton({
 	Name = "ACS 모든 플레이어 내보내기 (벽 설치)",
 	Callback = function()
 		showMessage("벽 소환!!")
@@ -2118,49 +2067,50 @@ Button_ACS_Player_fill = Tab2:CreateButton({
 	end
 })
 
-ACS_whizz = Tab2:CreateToggle({
+Tab2:CreateToggle({
 	Name = "ACS 소리테러",
 	CurrentValue = false,
 	Flag = "Toggle",
-	Callback = function(aO)
-		getgenv().importantshit = aO
-		while true do
-			task.wait()
-			for a, b in pairs(game.Players:GetPlayers()) do
-				ReplicatedStorage.ACS_Engine.Events.Whizz:FireServer(b)
-			end
-			if not getgenv().importantshit then
-				break
-			end
+	Callback = function(state)
+		getfenv().ACS_whizz = state
+		if state then
+			task.spawn(function()
+				while getfenv().ACS_whizz do
+					task.wait()
+					for a, b in ipairs(game.Players:GetPlayers()) do
+						game.ReplicatedStorage.ACS_Engine.Events.Whizz:FireServer(b)
+					end
+				end
+			end)
 		end
 	end,
 })
 
-ACS_laggy_laggy = Tab2:CreateToggle({
+Tab2:CreateToggle({
 	Name = "ACS 렉",
 	CurrentValue = false,
 	Flag = "Toggle",
-	Callback = function(hahahahahahahah)
-		getgenv().SynapseX = hahahahahahahah
-		while true do
-			task.wait()
-			if not getgenv().SynapseX then
-				print("a")
-				break
-			end
-			for i = 1, getgenv().AWP_exitscam or 1 do
-				game.ReplicatedStorage.ACS_Engine.Events.Equip:FireServer(
-					{
-					["Name"] = game.ReplicatedStorage.ACS_Engine.GunModels:FindFirstChildOfClass("Model").Name
-				}, 1
-				)
-				print("b")
-			end
+	Callback = function(state)
+		getfenv().ACS_laggy = state
+		if state then
+			task.spawn(function()
+				while getfenv().ACS_laggy do
+					task.wait()
+					local gun = game.ReplicatedStorage.ACS_Engine.GunModels:FindFirstChildOfClass("Model")
+					if gun then
+						for i = 1, getgenv().AWP_exitscam do
+							game.ReplicatedStorage.ACS_Engine.Events.Equip:FireServer({
+								Name = gun.Name
+							}, 1)
+						end
+					end
+				end
+			end)
 		end
 	end,
 })
 
-ACS_ping_rage = Tab2:CreateSlider({
+Tab2:CreateSlider({
 	Name = "ACS 렉 파워",
 	Range = {
 		1,
@@ -2175,29 +2125,30 @@ ACS_ping_rage = Tab2:CreateSlider({
 	end,
 })
 
-ACS_screen = Tab2:CreateToggle({
+Tab2:CreateToggle({
 	Name = "ACS 화면테러(약)",
 	CurrentValue = false,
 	Flag = "Toggle",
-	Callback = function(iaaaaa)
-		getgenv().lemon = iaaaaa
-		while true do
-			task.wait()
-			for a, b in pairs(game.Players:GetChildren()) do
-				ReplicatedStorage.ACS_Engine.Events.Suppression:FireServer(b, 1)
-			end
-			if not getgenv().lemon then
-				break
-			end
+	Callback = function(state)
+		getfenv().lemon = state
+		if state then
+			task.spawn(function()
+				while getfenv().lemon do
+					task.wait()
+					for a, b in ipairs(game.Players:GetPlayers()) do
+						game.ReplicatedStorage.ACS_Engine.Events.Suppression:FireServer(b, 1)
+					end
+				end
+			end)
 		end
 	end,
 })
 
 -- 섹션 1: 
-local Section2_2 = Tab2:CreateSection("CE Engine")
-local Divider = Tab2:CreateDivider()
+Tab2:CreateSection("CE Engine")
+Tab2:CreateDivider()
 
-local Button_ACS_Block = Tab2:CreateButton({
+Tab2:CreateButton({
 	Name = "CE 이벤트 경로 설정 ( 반드시 먼저 하세요 )",
 	Callback = function()
 		showMessage("CE Event SetUp")
@@ -2205,7 +2156,7 @@ local Button_ACS_Block = Tab2:CreateButton({
 	end
 })
 
-local Button_ACS_Click_KILL = Tab2:CreateToggle({
+Tab2:CreateToggle({
 	Name = "CE 클릭폭발",
 	CurrentValue = false,
 	Flag = "Toggle",
@@ -2219,7 +2170,7 @@ local Button_ACS_Click_KILL = Tab2:CreateToggle({
 	end,
 })
 
-local Button_CE_ALL_KILL = Tab2:CreateButton({
+Tab2:CreateButton({
 	Name = "CE ALL KILL",
 	Callback = function()
 		CEKill_ALL()
@@ -2227,7 +2178,7 @@ local Button_CE_ALL_KILL = Tab2:CreateButton({
 	end
 })
 
-local Button_CE_Ex_ALL_KILL = Tab2:CreateButton({
+Tab2:CreateButton({
 	Name = "CE 폭발 ALL KILL",
 	Callback = function()
 		CE_EX_ALL_KILL()
@@ -2235,7 +2186,7 @@ local Button_CE_Ex_ALL_KILL = Tab2:CreateButton({
 	end
 })
 
-local Toggle_CE_Select_KILL = Tab2:CreateToggle({
+Tab2:CreateToggle({
 	Name = "CE Select KILL",
 	Flag = "Toggle",
 	Callback = function(Value)
@@ -2249,7 +2200,7 @@ local Toggle_CE_Select_KILL = Tab2:CreateToggle({
 	end,
 })
 
-local Input_peng_Cuff_Name = Tab2:CreateInput({
+Tab2:CreateInput({
 	Name = "죽일 플레이어 이름",
 	PlaceholderText = "죽일 플레이어 이름 입력",
 	Callback = function(text)
@@ -2260,10 +2211,21 @@ local Input_peng_Cuff_Name = Tab2:CreateInput({
 ---------------------- 부대 스크립트 모음 탭 3 ------------------------
 local Tab3 = Window:CreateTab("부대 스크립트 모음", "shield-ban")
 
-local Section3_1 = Tab3:CreateSection("랭 부대")
-local Divider = Tab3:CreateDivider()
+Tab3:CreateSection("팽 부대")
 
-local Button_Lang_ALL_Cuff = Tab3:CreateButton({
+Tab3:CreateInput({
+	Name = "Select KILL name",
+	CurrentValue = "",
+	PlaceholderText = "Target Name",
+	RemoveTextAfterFocusLost = false,
+	Callback = function(ppppppp)
+		fanggggggggggggggggggggggggg = findPlayerDisplayName2(ppppppp)
+	end,
+})
+
+Tab3:CreateDivider()
+
+Tab3:CreateButton({
 	Name = "ALL Cuff",
 	Callback = function()
 		showMessage("ALL Cuff")
@@ -2271,7 +2233,7 @@ local Button_Lang_ALL_Cuff = Tab3:CreateButton({
 	end
 })
 
-local Button_Lang_Select_Cuff = Tab3:CreateButton({
+Tab3:CreateButton({
 	Name = "Select Cuff",
 	Callback = function()
 		showMessage("Select Cuff")
@@ -2279,7 +2241,7 @@ local Button_Lang_Select_Cuff = Tab3:CreateButton({
 	end
 })
 
-local Input_Lang_Cuff_Name = Tab3:CreateInput({
+Tab3:CreateInput({
 	Name = "Cuff_Name",
 	PlaceholderText = "Enter Name here",
 	Callback = function(text)
@@ -2287,16 +2249,108 @@ local Input_Lang_Cuff_Name = Tab3:CreateInput({
 	end
 })
 
-local Lang_All_Kill = Tab3:CreateButton({
-	Name = "ALL Kill [ak47필요]",
+Tab3:CreateButton({
+	Name = "ALL Kill [ak-47필요]",
 	Callback = function()
 		showMessage("ALL Kill")
-		lang_killall()
+		for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+			if player ~= Player and player.Character and player.Character:FindFirstChild("Humanoid") and player.Character:FindFirstChild("HumanoidRootPart") then
+				local args = {
+					player.Character.Humanoid,
+					player.Character.HumanoidRootPart,
+					69697474,
+					Vector3.new(0, -1, 0),
+					0,
+					0,
+					false
+				}
+				Player.Character:WaitForChild("AK-47"):WaitForChild("GunScript_Server"):WaitForChild("InflictTarget"):FireServer(unpack(args))
+			end
+		end
 	end
 })
 
+Tab3:CreateToggle({
+   Name = "All LoopKill [ak-47필요]",
+   CurrentValue = false,
+   Callback = function(MnMnMnMn)
+		getfenv().Atlantis = aaaaa
+		if aaaaa then
+			task.spawn(function()
+				while getfenv().Atlantis do
+					task.wait(0.2)
+					for a, b in ipairs(game:GetService("Players"):GetPlayers()) do
+						if b ~= Player and b.Character and b.Character:FindFirstChild("Humanoid") and b.Character:FindFirstChild("HumanoidRootPart") then
+							local c = {
+								b.Character.Humanoid,
+								b.Character.HumanoidRootPart,
+								69697474,
+								Vector3.new(0, -1, 0),
+								0,
+								0,
+								false
+							}
+							Player.Character:WaitForChild("AK-47"):WaitForChild("GunScript_Server"):WaitForChild("InflictTarget"):FireServer(unpack(c))
+						end
+					end
+				end
+			end)
+		end
+   end,
+})
+
+
+Tab3:CreateButton({
+	Name = "Select Kill [ak-47필요]",
+	Callback = function()
+		showMessage("Select Kill")
+		if fanggggggggggggggggggggggggg then
+			local b = {
+				fanggggggggggggggggggggggggg.Character.Humanoid,
+				fanggggggggggggggggggggggggg.Character.HumanoidRootPart,
+				69697474,
+				Vector3.new(0, -1, 0),
+				0,
+				0,
+				false
+			}
+			local c = Player.Character:WaitForChild("AK-47"):WaitForChild("GunScript_Server"):WaitForChild("InflictTarget")
+			c:FireServer(unpack(b))
+			showMessage("Select KILL : " ..fanggggggggggggggggggggggggg.Name)
+		else
+			showMessage("Target not found!!!!!!!!!!!!!!!!!")
+		end
+	end
+})
+
+Tab3:CreateToggle({
+   Name = "Select LoopKill",
+   CurrentValue = false,
+   Callback = function(aaaaa)
+		getfenv().Atlantis = aaaaa
+		if aaaaa then
+			task.spawn(function()
+				while getfenv().Atlantis do
+					task.wait(0.2)
+					if fanggggggggggggggggggggggggg  then
+						local a = {
+							fanggggggggggggggggggggggggg.Character.Humanoid,
+							fanggggggggggggggggggggggggg.Character.HumanoidRootPart,
+							69697474,
+							Vector3.new(0, -1, 0),
+							0,
+							0,
+							false
+						}
+						Player.Character:WaitForChild("AK-47"):WaitForChild("GunScript_Server"):WaitForChild("InflictTarget"):FireServer(unpack(a))
+					end
+				end
+			end)
+		end
+   end,
+})
+
 Tab3:CreateSection("강철부대")
-local Divider = Tab2:CreateDivider()
 
 Tab3:CreateButton({
 	Name = "강철부대 All 수갑 [가까이 가야함]",
@@ -2313,39 +2367,37 @@ Tab3:CreateButton({
 	end
 })
 
--- 섹션 2: 밥밥 부대
-local Section3_2 = Tab3:CreateSection("밥밥 부대")
-local Divider = Tab3:CreateDivider()
+Tab3:CreateSection("밥밥 부대")
 
-local Toggle_babbab_ALL_KILL = Tab3:CreateToggle({
+Tab3:CreateToggle({
 	Name = "글록 ALL KILL (글록필요)",
 	Flag = "Toggle",
 	Callback = function(Value)
 		if Value then
 			isGlockAllKillEnabled = true
-			GlockAllKill() -- 글록올킬 키는 스크립트
+			GlockAllKill()
 		else
 			isGlockAllKillEnabled = false
-			stopGlockAllKill() -- 글록올킬 끄는 스크립트
+			stopGlockAllKill()
 		end
 		showMessage("글록 ALL KILL (글록필요) : " .. tostring(Value))
 	end,
 })
 
-local Toggle_babbab_Cuff = Tab3:CreateToggle({
+Tab3:CreateToggle({
 	Name = "가까운 플레이어 세계밖으로 떨구기 (수갑 필요)",
 	Flag = "Toggle",
 	Callback = function(Value)
 		if Value then
-			babbab_Kick_Cuff_ON() -- 수갑 키는 스크립트
+			babbab_Kick_Cuff_ON()
 		else
-			babbab_Kick_Cuff_OFF()-- 수갑 끄는 스크립트
+			babbab_Kick_Cuff_OFF()
 		end
 		showMessage("세계밖으로 떨구기 : " .. tostring(Value))
 	end,
 })
 
-local Toggle_babbab_jak = Tab3:CreateToggle({
+Tab3:CreateToggle({
 	Name = "작대기 크기 키우기",
 	Flag = "Toggle",
 	Callback = function(Value)
@@ -2358,7 +2410,7 @@ local Toggle_babbab_jak = Tab3:CreateToggle({
 	end,
 })
 
-local Button_babbab_jak_tel = Tab3:CreateButton({
+Tab3:CreateButton({
 	Name = "작대기 위치로 텔레포트",
 	Callback = function()
 		teleportToPosition(targetPosition)-- 함수 채우기
@@ -2366,46 +2418,301 @@ local Button_babbab_jak_tel = Tab3:CreateButton({
 	end
 })
 
--- 섹션 3: 태비 부대
-local Section3_3 = Tab3:CreateSection("태비 부대")
-local Divider = Tab3:CreateDivider()
+Tab3:CreateSection("태비 부대")
 
-local Button_tebi_jak_give = Tab3:CreateButton({
+Tab3:CreateButton({
 	Name = "모든 총 가져오기",
 	Callback = function()
 		Toggle_Tebi_tool_giver_f()
 		showMessage("모든 총 가져오기")
-	end-- 함수 채우기
+	end
 })
 
-local Button_tebi_jak_vote = Tab3:CreateButton({
+Tab3:CreateButton({
 	Name = "모든 플레이어에게 투표창 띄우기",
 	Callback = function()
 		Toggle_Tebi_vote_f()
 		showMessage("투표창 띄우기")
-	end-- 함수 채우기
+	end
 })
 
--- 섹션 4: 샤크부대
-local Section3_4 = Tab3:CreateSection("샤크 부대")
-local Divider = Tab3:CreateDivider()
+Tab3:CreateSection("샤크 부대")
 
-local Button_Sak_ALL_Cuff = Tab3:CreateButton({
+Tab3:CreateButton({
 	Name = "ALL Cuff",
 	Callback = function()
 		cuffAllPlayersa()
 		showMessage("ALL Cuff")
-	end-- 함수 채우기
+	end
 })
 
-local Section3_4 = Tab3:CreateSection("스카이 부대")
-local Divider = Tab3:CreateDivider()
+Tab3:CreateSection("스카이 부대")
 
-local SKY_allkill = Tab3:CreateButton({
-	Name = "ALL KILL [K2 필요]",
+Tab3:CreateButton({
+	Name = "ALL KILL [K2 필요] [패치됨 곧 고칠거임!!!!]",
 	Callback = function()
-		sky_killall()
+		for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+			if player ~= Player and player.Character and player.Character:FindFirstChild("Humanoid") and player.Character:FindFirstChild("HumanoidRootPart") then
+				local args = {
+					player.Character.Humanoid,
+					player.Character.HumanoidRootPart,
+					69697474,
+					Vector3.new(0, -1, 0),
+					0,
+					0,
+					false
+				}
+				Player.Character:WaitForChild("K2"):WaitForChild("GunScript_Server"):WaitForChild("InflictTarget"):FireServer(unpack(args))
+			end
+		end
 		showMessage("ALL KILL")
-	end-- 함수 채우기
+	end
 })
+
+Tab3:CreateSection("서울 부대") -- 서울부대서울부대서울부대
+
+Tab3:CreateInput({
+	Name = "Select KILL name",
+	CurrentValue = "",
+	PlaceholderText = "Target Name",
+	RemoveTextAfterFocusLost = false,
+	Callback = function(easyscript)
+		mysoul = findPlayerDisplayName2(easyscript)
+	end,
+})
+
+Tab3:CreateDivider()
+
+Tab3:CreateButton({
+	Name = "Better ALL KILL [총 없어도 됨 99% 작동]",
+	Callback = function()
+			for a, b in ipairs(game:GetService("Players"):GetPlayers()) do
+				if b ~= Player and b.Character and b.Character:FindFirstChild("Humanoid") and (b.Character:FindFirstChild("Torso") or b.Character:FindFirstChild("UpperTorso")) then
+					local c = nil
+					for d, e in ipairs(game.Players:GetPlayers()) do
+						if e ~= Player then
+							if e.Backpack:FindFirstChild("Luger") then
+								c = e.Backpack.Luger
+								break
+							elseif e.Backpack:FindFirstChild("General") then
+								c = e.Backpack.General
+								break
+							end
+						end
+					end
+					if c then
+						c.GunScript_Server.InflictTarget:FireServer(
+							b.Character.Humanoid,
+							b.Character:FindFirstChild("Torso") or b.Character:FindFirstChild("UpperTorso"),
+							69697474,
+							Vector3.new(0, 0, -1),
+							0,
+							0,
+							false
+						)
+					end
+				end
+			end
+		showMessage("ALL KILL")
+	end
+})
+
+Tab3:CreateToggle({
+	Name = "Better ALL LOOPKILL [총 없어도 됨 99% 작동]",
+	CurrentValue = false,
+	Callback = function(red)
+		getfenv().OLED = red
+		if red then
+			task.spawn(function()
+				while getfenv().OLED do
+					task.wait(.1)
+					for a, b in ipairs(game:GetService("Players"):GetPlayers()) do
+						if b ~= Player and b.Character and b.Character:FindFirstChild("Humanoid") and (b.Character:FindFirstChild("Torso") or b.Character:FindFirstChild("UpperTorso")) then
+							local c = nil
+							for d, e in ipairs(game.Players:GetPlayers()) do
+								if e ~= Player then
+									if e.Backpack:FindFirstChild("Luger") then
+										c = e.Backpack.Luger
+										break
+									elseif e.Backpack:FindFirstChild("General") then
+										c = e.Backpack.General
+										break
+									end
+								end
+							end
+							if c then
+								c.GunScript_Server.InflictTarget:FireServer(
+										b.Character.Humanoid,
+										b.Character:FindFirstChild("Torso") or b.Character:FindFirstChild("UpperTorso"),
+										69697474,
+										Vector3.new(0, 0, -1),
+										0,
+										0,
+										false
+									)
+							end
+						end
+					end
+				end
+			end)
+		end
+	end,
+})
+
+Tab3:CreateButton({
+	Name = "Better Select KILL [총 없어도 됨 99% 작동]",
+	Callback = function()
+		if mysoul and mysoul.Character and mysoul.Character:FindFirstChild("Humanoid") and (mysoul.Character:FindFirstChild("Torso") or mysoul.Character:FindFirstChild("UpperTorso")) then
+			local c = nil
+			for d, e in ipairs(game.Players:GetPlayers()) do
+				if e ~= Player then
+					if e.Backpack:FindFirstChild("Luger") then
+						c = e.Backpack.Luger
+						break
+					elseif e.Backpack:FindFirstChild("General") then
+						c = e.Backpack.General
+						break
+					end
+				end
+			end
+			if c then
+				c.GunScript_Server.InflictTarget:FireServer(
+					mysoul.Character.Humanoid,
+					mysoul.Character:FindFirstChild("Torso") or mysoul.Character:FindFirstChild("UpperTorso"),
+					69697474,
+					Vector3.new(0, 0, -1),
+					0,
+					0,
+					false
+				)
+				showMessage("Select KILL → " .. mysoul.Name)
+			end
+		else
+			showMessage("대상이 없따")
+		end
+	end
+})
+
+Tab3:CreateToggle({
+	Name = "Better Select LOOPKILL [총 없어도 됨 99% 작동]",
+	CurrentValue = false,
+	Callback = function(lllllll)
+		getfenv().ab = lllllll
+		if lllllll then
+			task.spawn(function()
+				while getfenv().ab do
+					task.wait(.1)
+					if mysoul and mysoul.Character and mysoul.Character:FindFirstChild("Humanoid") and (mysoul.Character:FindFirstChild("Torso") or mysoul.Character:FindFirstChild("UpperTorso")) then
+						local c = nil
+						for d, e in ipairs(game.Players:GetPlayers()) do
+							if e ~= Player then
+								if e.Backpack:FindFirstChild("Luger") then
+									c = e.Backpack.Luger
+									break
+								elseif e.Backpack:FindFirstChild("General") then
+									c = e.Backpack.General
+									break
+								end
+							end
+						end
+						if c then
+							c.GunScript_Server.InflictTarget:FireServer(
+								mysoul.Character.Humanoid,
+								mysoul.Character:FindFirstChild("Torso") or mysoul.Character:FindFirstChild("UpperTorso"),
+								69697474,
+								Vector3.new(0, 0, -1),
+								0,
+								0,
+								false
+							)
+						end
+					end
+				end
+			end)
+		end
+	end,
+})
+
+Tab3:CreateButton({
+	Name = "ALL KILL [Luger 아니면 General 필요]",
+	Callback = function()
+		for a, b in ipairs(game:GetService("Players"):GetPlayers()) do
+			if b ~= Player and b.Character and b.Character:FindFirstChild("Humanoid") and (b.Character:FindFirstChild("Torso") or b.Character:FindFirstChild("UpperTorso")) then
+				(Player.Backpack:FindFirstChild("Luger") or Player.Backpack:FindFirstChild("General") or Player.Backpack:FindFirstChild("Luger")).GunScript_Server.InflictTarget:FireServer(b.Character.Humanoid, b.Character:FindFirstChild("Torso") or b.Character:FindFirstChild("UpperTorso"), 69697474, Vector3.new(0, 0, -1), 0, 0, false)
+			end
+		end
+		showMessage("ALL KILL")
+	end
+})
+
+Tab3:CreateToggle({
+	Name = "ALL LOOPKILL [Luger 아니면 General 필요]",
+	CurrentValue = false,
+	Callback = function(sanandress)
+		getfenv().CJ = sanandress
+		if sanandress then
+			task.spawn(function()
+				while getfenv().CJ do
+					task.wait(.1)
+					for a, b in ipairs(game.Players:GetPlayers()) do
+						if b ~= Player and b.Character and b.Character:FindFirstChild("Humanoid") and (b.Character:FindFirstChild("Torso") or b.Character:FindFirstChild("UpperTorso")) then
+							(Player.Backpack:FindFirstChild("Luger") or Player.Backpack:FindFirstChild("General") or Player.Backpack:FindFirstChild("Luger")).GunScript_Server.InflictTarget:FireServer(
+								b.Character.Humanoid,
+								b.Character:FindFirstChild("Torso") or b.Character:FindFirstChild("UpperTorso"),
+								69697474,
+								Vector3.new(0, 0, -1),
+								0,
+								0,
+								false
+							)
+						end
+					end
+				end
+			end)
+		end
+	end,
+})
+
+Tab3:CreateButton({
+	Name = "Select KILL [Luger 아니면 General 필요]",
+	Callback = function()
+		if mysoul and mysoul.Character and mysoul.Character:FindFirstChild("Humanoid") and (mysoul.Character:FindFirstChild("Torso") or mysoul.Character:FindFirstChild("UpperTorso")) then
+			(Player.Backpack:FindFirstChild("Luger") or Player.Backpack:FindFirstChild("General") or Player.Backpack:FindFirstChild("Luger")).GunScript_Server.InflictTarget:FireServer(
+				mysoul.Character.Humanoid,
+				mysoul.Character:FindFirstChild("Torso") or mysoul.Character:FindFirstChild("UpperTorso"),
+				69697474,
+				Vector3.new(0, 0, -1),
+				0,
+				0,
+				false
+			)
+		end
+		showMessage("Select KILL")
+	end
+})
+
+Tab3:CreateToggle({
+	Name = "Select LOOPKILL [Luger 아니면 General 필요]",
+	CurrentValue = false,
+	Callback = function(haha)
+		getfenv().deadman = haha
+		task.spawn(function()
+			while getfenv().deadman do
+				task.wait()
+				if mysoul and mysoul.Character and mysoul.Character:FindFirstChild("Humanoid") and (mysoul.Character:FindFirstChild("Torso") or mysoul.Character:FindFirstChild("UpperTorso")) then
+					(Player.Backpack:FindFirstChild("Luger") or Player.Backpack:FindFirstChild("General") or Player.Backpack:FindFirstChild("Luger")).GunScript_Server.InflictTarget:FireServer(
+						mysoul.Character.Humanoid,
+						mysoul.Character:FindFirstChild("Torso") or mysoul.Character:FindFirstChild("UpperTorso"),
+						69697474,
+						Vector3.new(0, 0, -1),
+						0,
+						0,
+						false
+					)
+				end
+			end
+		end)
+	end,
+})
+
 ArrayField:LoadConfiguration()
