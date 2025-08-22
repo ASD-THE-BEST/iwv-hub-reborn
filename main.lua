@@ -6,12 +6,34 @@
 
 -- [[2.0 change log : [+] 서울부대 : Select Loopkill,Loopkill all,SelectKill,AllKill(총 필요 없음),All LoopKill(총 필요 없음),Select LoopKill(총 X), Select Kill(총 X), [+] 팽 부대 : All LoopKill,Select Kill,Select LoopKill, [+] 성능 최적화들, [-] 서울부대가 ESP를 바꾸지도 않았는데 감지함(CoreGUI같은데 어떻게 감지? 최대한 고쳐봄)
 
+-- 2.1 change log : 서울부대 안티치트 감지 삭제,팽부대 올루프킬추가(기능 더 추가할거 tysm chae.r1n_1023), 로컬스크립트 킥 방지 추가, 최적화들
+
+-- 서울부대 안티치트 없애기 --
+game.Players.LocalPlayer.CharacterAdded:Connect(function(c)
+	if c:FindFirstChild("JyAntiCheat.lua [READ]") then
+		c["JyAntiCheat.lua [READ]"]:Destroy()
+	end
+	if c:FindFirstChild("Anti") then
+		c["Anti"]:Destroy()
+	end
+end)
+
+if game.Players.LocalPlayer.Character then
+	if game.Players.LocalPlayer.Character:FindFirstChild("JyAntiCheat.lua [READ]") then
+		game.Players.LocalPlayer.Character["JyAntiCheat.lua [READ]"]:Destroy()
+	end
+	if game.Players.LocalPlayer.Character:FindFirstChild("Anti") then
+		game.Players.LocalPlayer.Character["Anti"]:Destroy()
+	end
+end
+-- main
+version = 2.1
 local ArrayField = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/ArrayField/main/Source.lua'))()
 getgenv().SecureMode = true
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-	Name = "IWV Hub Reborn",
+	Name = "IWV Hub Reborn v" .. version,
 	Icon = "code",
 	ShowText = "IWV",
 	Theme = "Amethyst",
@@ -35,14 +57,25 @@ local Window = Rayfield:CreateWindow({
 		}
 	}
 })
----------------------- 기본기능 함수 모음 -----------------------
-Players = game:GetService("Players")
-Player = Players.LocalPlayer
-ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 if game:GetService("ReplicatedStorage"):FindFirstChild("line") then
 	game:GetService("ReplicatedStorage"):FindFirstChild("line"):Destroy()
 end
+
+-- 로컬스크립트 안티킥 --
+getgenv().iwvhubreborn = false
+
+local iwv_love
+iwv_love = hookmetamethod(game, "__namecall", function(a, ...)
+	if getgenv().iwvhubreborn and typeof(getnamecallmethod()) == "string" and getnamecallmethod():lower() == "kick" then
+		return 0
+	end
+	return iwv_love(a, ...)
+end)
+-- 끗 --
+Players = game:GetService("Players")
+Player = Players.LocalPlayer
+ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local dragInput, mousePos, framePos
 local SpamTextttttt
@@ -56,7 +89,7 @@ local colors = {
 	Color3.fromRGB(128, 0, 128),
 	Color3.fromRGB(0, 0, 0)
 }
-local ToggleFly, ToggleNoclip, ToggleESP, ToggleSpin, ToggleKillAura, ToggleAimBot, ToggleStaticCuff, ToggleTpKill
+local ToggleFly, ToggleNoclip, ToggleESP, ToggleSpin, ToggleStaticCuff, ToggleTpKill
 local ToggleWeaponSize, ToggleSwordAttack
 isKeyValid = false
 dragging = false
@@ -79,7 +112,6 @@ flyEnabled = false
 noclipEnabled = false
 spinEnabled = false
 KillAuraEnabled = false
-AimBotEnabled = false
 hahaha = nil
 StaticCuffEnabled = false
 TpKillEnabled = false
@@ -145,22 +177,6 @@ local function gangchulUnCuff()
 		end
 	end
 end
-
------------------------- 프리즌 라이프 -------------------------------
-
-local function getTargetPlayers()
-	local targetPlayers = {}
-	for _, player in pairs(Players:GetPlayers()) do
-		if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-			if player ~= Player then
-				table.insert(targetPlayers, player)
-			end
-		end
-	end
-	return targetPlayers
-end
-
------------------------- 프리즌 라이프 -------------------------------
 --------------------------------------- 은신 기능 ----------------------------------------------------
 
 function Transparency_toggle_bt(value)
@@ -1352,6 +1368,28 @@ local function cuffAllPlayers()
 		print("No player with handcuffs found.")
 	end
 end
+-- all kill no gun(tysm, chae.r1n_1023(1233758469425725460))
+function fanggluv()
+	local getGun = function()
+		local GunScript_Server = workspace:FindFirstChild("GunScript_Server", true) or Players:FindFirstChild("GunScript_Server", true)
+		if GunScript_Server then
+			return GunScript_Server
+		end
+		return nil
+	end
+	while task.wait() do
+		for i, v in pairs(Players:GetPlayers()) do
+			local gun = getGun()
+			pcall(function()
+				gun.InflictTarget:FireServer(
+            v.Character.Humanoid,
+            v.Character.HumanoidRootPart,
+            math.huge, Vector3.new(0, 0, 0), math.huge, 69697474, true
+        )
+			end)
+		end
+	end
+end
 ---------------------- 부대게임, 팽부대 끝 ------------------------------
 ---------------------- 부대게임, 밥밥부대 시작 ------------------------------
 -- 밥밥 부대
@@ -1776,6 +1814,16 @@ Tab:CreateToggle({
 			showMessage("Speed :" .. tostring(Value))
 			Player.Character.Humanoid.WalkSpeed = defaultSpeeddddddd
 		end
+	end,
+})
+
+Tab:CreateToggle({
+	Name = "LocalScript AntiKick",
+	CurrentValue = false,
+	Flag = "Toggle",
+	Callback = function(abcd)
+		getgenv().iwvhubreborn = abcd
+		showMessage("LocalScript AntiKick : " .. tostring(abcd))
 	end,
 })
 
@@ -2250,6 +2298,14 @@ Tab3:CreateInput({
 })
 
 Tab3:CreateButton({
+	Name = "ALL LoopKill [총 필요없음]",
+	Callback = function()
+		showMessage("ALL LoopKill")
+		fanggluv()
+	end
+})
+
+Tab3:CreateButton({
 	Name = "ALL Kill [ak-47필요]",
 	Callback = function()
 		showMessage("ALL Kill")
@@ -2271,9 +2327,9 @@ Tab3:CreateButton({
 })
 
 Tab3:CreateToggle({
-   Name = "All LoopKill [ak-47필요]",
-   CurrentValue = false,
-   Callback = function(MnMnMnMn)
+	Name = "All LoopKill [ak-47필요]",
+	CurrentValue = false,
+	Callback = function(MnMnMnMn)
 		getfenv().Atlantis = aaaaa
 		if aaaaa then
 			task.spawn(function()
@@ -2296,7 +2352,7 @@ Tab3:CreateToggle({
 				end
 			end)
 		end
-   end,
+	end,
 })
 
 
@@ -2316,7 +2372,7 @@ Tab3:CreateButton({
 			}
 			local c = Player.Character:WaitForChild("AK-47"):WaitForChild("GunScript_Server"):WaitForChild("InflictTarget")
 			c:FireServer(unpack(b))
-			showMessage("Select KILL : " ..fanggggggggggggggggggggggggg.Name)
+			showMessage("Select KILL : " .. fanggggggggggggggggggggggggg.Name)
 		else
 			showMessage("Target not found!!!!!!!!!!!!!!!!!")
 		end
@@ -2324,9 +2380,9 @@ Tab3:CreateButton({
 })
 
 Tab3:CreateToggle({
-   Name = "Select LoopKill",
-   CurrentValue = false,
-   Callback = function(aaaaa)
+	Name = "Select LoopKill",
+	CurrentValue = false,
+	Callback = function(aaaaa)
 		getfenv().Atlantis = aaaaa
 		if aaaaa then
 			task.spawn(function()
@@ -2347,7 +2403,7 @@ Tab3:CreateToggle({
 				end
 			end)
 		end
-   end,
+	end,
 })
 
 Tab3:CreateSection("강철부대")
@@ -2486,22 +2542,22 @@ Tab3:CreateDivider()
 Tab3:CreateButton({
 	Name = "Better ALL KILL [총 없어도 됨 99% 작동]",
 	Callback = function()
-			for a, b in ipairs(game:GetService("Players"):GetPlayers()) do
-				if b ~= Player and b.Character and b.Character:FindFirstChild("Humanoid") and (b.Character:FindFirstChild("Torso") or b.Character:FindFirstChild("UpperTorso")) then
-					local c = nil
-					for d, e in ipairs(game.Players:GetPlayers()) do
-						if e ~= Player then
-							if e.Backpack:FindFirstChild("Luger") then
-								c = e.Backpack.Luger
-								break
-							elseif e.Backpack:FindFirstChild("General") then
-								c = e.Backpack.General
-								break
-							end
+		for a, b in ipairs(game:GetService("Players"):GetPlayers()) do
+			if b ~= Player and b.Character and b.Character:FindFirstChild("Humanoid") and (b.Character:FindFirstChild("Torso") or b.Character:FindFirstChild("UpperTorso")) then
+				local c = nil
+				for d, e in ipairs(game.Players:GetPlayers()) do
+					if e ~= Player then
+						if e.Backpack:FindFirstChild("Luger") then
+							c = e.Backpack.Luger
+							break
+						elseif e.Backpack:FindFirstChild("General") then
+							c = e.Backpack.General
+							break
 						end
 					end
-					if c then
-						c.GunScript_Server.InflictTarget:FireServer(
+				end
+				if c then
+					c.GunScript_Server.InflictTarget:FireServer(
 							b.Character.Humanoid,
 							b.Character:FindFirstChild("Torso") or b.Character:FindFirstChild("UpperTorso"),
 							69697474,
@@ -2510,9 +2566,9 @@ Tab3:CreateButton({
 							0,
 							false
 						)
-					end
 				end
 			end
+		end
 		showMessage("ALL KILL")
 	end
 })
