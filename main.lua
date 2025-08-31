@@ -10,7 +10,7 @@
 
 -- 2.1.1 change log : FOV추가, 이제 standerd cheat 슬라이더는 실시간으로 바뀜,Auto Rejoin추가, 최적화들
 
--- 2.1.2 change log : 짱구부대 올킬,올 루프킬 추가, CE selectkill 추가,Select allkill 추가,click kill 추가, 최적화들
+-- 2.1.2 change log : 짱구부대 올킬,올 루프킬 추가, CE selectkill 추가,Select allkill 추가,click kill 추가, 최적화들 헤헤
 
 -- 서울부대 안티치트 없애기 --
 game.Players.LocalPlayer.CharacterAdded:Connect(function(c)
