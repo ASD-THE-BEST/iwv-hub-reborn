@@ -10,6 +10,8 @@
 
 -- 2.1.1 change log : FOV추가, 이제 standerd cheat 슬라이더는 실시간으로 바뀜,Auto Rejoin추가, 최적화들
 
+-- 2.1.2 change log : 짱구부대 올킬,올 루프킬 추가, CE selectkill 추가,Select allkill 추가,click kill 추가, 최적화들
+
 -- 서울부대 안티치트 없애기 --
 game.Players.LocalPlayer.CharacterAdded:Connect(function(c)
 	if c:FindFirstChild("JyAntiCheat.lua [READ]") then
@@ -29,7 +31,7 @@ if game.Players.LocalPlayer.Character then
 	end
 end
 -- main
-version = "2.1.1"
+version = "2.1.2"
 local ArrayField = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/ArrayField/main/Source.lua'))()
 getgenv().SecureMode = true
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -134,9 +136,9 @@ baseSize = 100
 sizeIncrement = 50
 currentColorIndex = 1
 fanggggggggggggggggggggggggg = nil
-HWID = game:GetService("RbxAnalyticsService"):GetClientId()
-HWIDiddy = nil
-ahhhhh = false
+abcdefg = nil
+ilovethisproject = nil
+Mouse = Player:GetMouse()
 
 local function findPlayerDisplayName(identifier)
 	for _, player in ipairs(Players:GetPlayers()) do
@@ -1102,8 +1104,6 @@ function ACS_Click_Breach_ON(ACS_X, ACS_Y, ACS_Z)
 end
 
 function ACS_Click_Breach_OFF()
-	local Mouse = Player:GetMouse()
-
 	local PlaceBlockRemote = ReplicatedStorage:WaitForChild("ACS_Engine"):WaitForChild("Events"):WaitForChild("Breach")
 	if ACS_mouseClick_Breach then
 		ACS_mouseClick_Breach:Disconnect()
@@ -1115,8 +1115,6 @@ function ACS_Click_Breach_OFF()
 end
 
 function ACS_Player_fli()
-	local Mouse = Player:GetMouse()
-    
     -- 블록 설치를 요청하는 원격 함수 가져오기
 	local PlaceBlockRemote = ReplicatedStorage:WaitForChild("ACS_Engine"):WaitForChild("Events"):WaitForChild("Breach")
 
@@ -2227,6 +2225,14 @@ Tab2:CreateSlider({
 	end,
 })
 
+Tab2:CreateButton({
+	Name = "ACS ALL KILL",
+	Callback = function()
+		showMessage("ACS ALL KILL")
+		ACS_ALL_KILL()
+	end
+})
+
 Tab2:CreateToggle({
 	Name = "ACS 화면테러(약)",
 	CurrentValue = false,
@@ -2257,6 +2263,14 @@ Tab2:CreateButton({
 	end
 })
 
+Tab2:CreateInput({
+	Name = "죽일 플레이어 이름",
+	PlaceholderText = "죽일 플레이어 이름 입력",
+	Callback = function(text)
+		ilovethisproject = findPlayerDisplayName2(text)
+	end
+})
+
 Tab2:CreateToggle({
 	Name = "CE 클릭폭발",
 	CurrentValue = false,
@@ -2278,6 +2292,23 @@ Tab2:CreateButton({
 	end
 })
 
+Tab2:CreateToggle({
+	Name = "CE ALL LOOPKILL",
+	Callback = function(Value)
+		getfenv().ooooooooooooooo = Value
+		if Value then
+			task.spawn(function()
+				while getfenv().ooooooooooooooo do
+					task.wait()
+					CEKill_ALL()
+				end
+			end)
+		end
+		showMessage("CE ALL LOOPKill : " .. tostring(Value))
+	end,
+})
+
+
 Tab2:CreateButton({
 	Name = "CE 폭발 ALL KILL",
 	Callback = function()
@@ -2286,25 +2317,62 @@ Tab2:CreateButton({
 	end
 })
 
-Tab2:CreateToggle({
+Tab2:CreateButton({
 	Name = "CE Select KILL",
+	Callback = function()
+		Events["DamageEvent"]:FireServer(ilovethisproject.Character:FindFirstChild("Humanoid"), 100000, "Torso", {
+			'nil',
+			'Auth',
+			'nil',
+			'nil'
+		})
+		showMessage("CE Select Kill : " .. tostring(Value))
+	end
+})
+
+Tab2:CreateToggle({
+	Name = "CE Select LOOPKILL",
 	Callback = function(Value)
+		getfenv().cs2 = Value
 		if Value then
-			CE_EX_target_Kill_sw = true
-			CE_EX_Select_KILL()
-		else
-			CE_EX_target_Kill_sw = false
+			task.spawn(function()
+				while getfenv().cs2 do
+					task.wait()
+					Events["DamageEvent"]:FireServer(ilovethisproject.Character:FindFirstChild("Humanoid"), 100000, "Torso", {
+						'nil',
+						'Auth',
+						'nil',
+						'nil'
+					})
+				end
+			end)
 		end
-		showMessage("CE_EX_target_Kill : " .. tostring(Value))
+		showMessage("CE Select LOOPKill : " .. tostring(Value))
 	end,
 })
 
-Tab2:CreateInput({
-	Name = "죽일 플레이어 이름",
-	PlaceholderText = "죽일 플레이어 이름 입력",
-	Callback = function(text)
-		CE_EX_target = findPlayerDisplayName(text)
-	end
+Tab2:CreateToggle({
+	Name = "CE Click Kill",
+	Callback = function(Value)
+		if Value then
+			Mouse.Button1Down:Connect(function()
+				local targetttt = Mouse.Target
+				if targetttt and targetttt.Parent then
+					local asdf = targetttt.Parent:FindFirstChild("Humanoid")
+					if asdf then
+						Events["DamageEvent"]:FireServer(asdf, 100000, "Torso", {
+							'nil',
+							'Auth',
+							'nil',
+							'nil'
+						})
+						showMessage("Click Kill : " .. tostring(targetttt.Parent.Name))
+					end
+				end
+			end)
+		end
+		showMessage("CE Click Kill : " .. tostring(Value))
+	end,
 })
 
 ---------------------- 부대 스크립트 모음 탭 3 ------------------------
@@ -2819,6 +2887,34 @@ Tab3:CreateToggle({
 	end,
 })
 
+Tab3:CreateSection("짱구 부대")
+
+Tab3:CreateLabel("pro tip : 짱구부대는 CE 엔진을 쓴다", "scroll", Color3.fromRGB(79, 39, 96), false)
+
+Tab3:CreateButton({
+	Name = "ALL KILL",
+	Callback = function()
+		game:GetService("ReplicatedStorage").KillAllPlayersEvent:FireServer()
+		showMessage("ALL KILL")
+	end
+})
+
+Tab3:CreateToggle({
+	Name = "ALL LOOPKILL",
+	CurrentValue = false,
+	Callback = function(diddy)
+		getfenv().PpPpP = diddy
+		if diddy then
+			task.spawn(function()
+				while getfenv().PpPpP do
+					task.wait()
+					game:GetService("ReplicatedStorage").KillAllPlayersEvent:FireServer()
+				end
+			end)
+		end
+	end,
+})
+
 local Tab4 = Window:CreateTab("Misc", "ellipsis")
 Tab4:CreateDivider()
 
@@ -2845,5 +2941,7 @@ Tab4:CreateButton({
 Tab4:CreateSection("Credit")
 
 Tab4:CreateLabel("Credit to IWV & Community", "scroll", Color3.fromRGB(79, 39, 96), false)
+
+
 
 ArrayField:LoadConfiguration()
