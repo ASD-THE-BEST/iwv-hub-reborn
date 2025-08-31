@@ -8,6 +8,8 @@
 
 -- 2.1 change log : 서울부대 안티치트 감지 삭제,팽부대 올루프킬추가(기능 더 추가할거 tysm chae.r1n_1023), 로컬스크립트 킥 방지 추가, 최적화들
 
+-- 2.1.1 change log : FOV추가, 이제 standerd cheat 슬라이더는 실시간으로 바뀜,Auto Rejoin추가, 최적화들
+
 -- 서울부대 안티치트 없애기 --
 game.Players.LocalPlayer.CharacterAdded:Connect(function(c)
 	if c:FindFirstChild("JyAntiCheat.lua [READ]") then
@@ -27,7 +29,7 @@ if game.Players.LocalPlayer.Character then
 	end
 end
 -- main
-version = 2.1
+version = "2.1.1"
 local ArrayField = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/ArrayField/main/Source.lua'))()
 getgenv().SecureMode = true
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -46,8 +48,8 @@ local Window = Rayfield:CreateWindow({
 	},
 	KeySystem = true,
 	KeySettings = {
-		Title = "IWV hub Reborn",
-		Subtitle = "Key System",
+		Title = "IWV Hub Reborn v" .. version,
+		Subtitle = "Disclaimer",
 		Note = "Credit to IWV & community\nkey : 69",
 		FileName = "Key",
 		SaveKey = false,
@@ -99,10 +101,15 @@ spinSpeed = 2
 flySpeed = 2
 Speedy = 35
 defaultSpeeddddddd = Player.Character.Humanoid.WalkSpeed
+ahh = false
 Jumppy = 60
 defaultJumppyyyyy = Player.Character.Humanoid.JumpPower
+ahhh = false
 mysoul = nil
 spinning = false
+Fov = 80
+defaultFov = workspace.CurrentCamera.FieldOfView
+ahhhh = false
 noclip = false
 userName = ""
 espEnabled = false
@@ -127,6 +134,9 @@ baseSize = 100
 sizeIncrement = 50
 currentColorIndex = 1
 fanggggggggggggggggggggggggg = nil
+HWID = game:GetService("RbxAnalyticsService"):GetClientId()
+HWIDiddy = nil
+ahhhhh = false
 
 local function findPlayerDisplayName(identifier)
 	for _, player in ipairs(Players:GetPlayers()) do
@@ -143,6 +153,15 @@ local function findPlayerDisplayName2(identifier)
 		end
 	end
 end
+
+-- 오토리조인 --
+getgenv().autorj = false
+game.GuiService.ErrorMessageChanged:Connect(function()
+	if getgenv().autorj then
+		game:GetService("TeleportService"):Teleport(game.PlaceId, Player)
+	end
+end)
+-- 끗 --
 ------------------------ 강철 부대 ----------------------------
 local function gangchulCuff()
 	local ohString1 = "Cuff"
@@ -1797,17 +1816,17 @@ local function showMessage(mass)
 end
 ---------------------- 기본기능 모음 탭 1 ------------------------
 local FlingUser_Name = nil
-local Tab = Window:CreateTab("Standerd Cheat", "user-cog")
+local Tab = Window:CreateTab("Standerd Cheats", "user-cog")
 
-Tab:CreateSection("Cheat")
+Tab:CreateSection("Cheats")
 Tab:CreateDivider()
 
 Tab:CreateToggle({
 	Name = "WalkSpeed",
 	CurrentValue = false,
-	Flag = "Toggle",
 	Callback = function(Value)
-		if Value then
+		ahh = Value
+		if ahh then
 			showMessage("Speed :" .. tostring(Value))
 			Player.Character.Humanoid.WalkSpeed = Speedy
 		else
@@ -1818,21 +1837,11 @@ Tab:CreateToggle({
 })
 
 Tab:CreateToggle({
-	Name = "LocalScript AntiKick",
-	CurrentValue = false,
-	Flag = "Toggle",
-	Callback = function(abcd)
-		getgenv().iwvhubreborn = abcd
-		showMessage("LocalScript AntiKick : " .. tostring(abcd))
-	end,
-})
-
-Tab:CreateToggle({
 	Name = "JumpPower",
 	CurrentValue = false,
-	Flag = "Toggle",
 	Callback = function(Value)
-		if Value then
+		ahhh = Value
+		if ahhh then
 			showMessage("JumpPower :" .. tostring(Value))
 			Player.Character.Humanoid.JumpPower = Jumppy
 		else
@@ -1843,9 +1852,41 @@ Tab:CreateToggle({
 })
 
 Tab:CreateToggle({
+	Name = "FOV",
+	CurrentValue = false,
+	Callback = function(Value)
+		ahhhh = Value
+		if ahhhh then
+			showMessage("FOV :" .. tostring(Value))
+			workspace.CurrentCamera.FieldOfView = Fov
+		else
+			showMessage("FOV :" .. tostring(Value))
+			workspace.CurrentCamera.FieldOfView = defaultFov
+		end
+	end,
+})
+
+Tab:CreateToggle({
+	Name = "Auto Rejoin",
+	CurrentValue = false,
+	Callback = function(abcde)
+		getgenv().autorj = abcde
+		showMessage("Auto Rejoin : " .. tostring(abcde))
+	end,
+})
+
+Tab:CreateToggle({
+	Name = "LocalScript AntiKick",
+	CurrentValue = false,
+	Callback = function(abcd)
+		getgenv().iwvhubreborn = abcd
+		showMessage("LocalScript AntiKick : " .. tostring(abcd))
+	end,
+})
+
+Tab:CreateToggle({
 	Name = "Fly",
 	CurrentValue = false,
-	Flag = "Toggle",
 	Callback = function(Value)
 		if Value then
 			showMessage("Fly :" .. tostring(Value))
@@ -1860,7 +1901,6 @@ Tab:CreateToggle({
 Tab:CreateToggle({
 	Name = "Noclip",
 	CurrentValue = false,
-	Flag = "Toggle",
 	Callback = function(Value)
 		showMessage("Noclip : " .. tostring(Value))
 		setNoclip(Value)
@@ -1870,7 +1910,6 @@ Tab:CreateToggle({
 Tab:CreateToggle({
 	Name = "Spin",
 	CurrentValue = false,
-	Flag = "Toggle",
 	Callback = function(Value)
 		if Value then
 			showMessage("Spin : " .. tostring(Value))
@@ -1884,7 +1923,6 @@ Tab:CreateToggle({
 Tab:CreateToggle({
 	Name = "ESP",
 	CurrentValue = false,
-	Flag = "Toggle",
 	Callback = function(Value)
 		if Value then
 			showMessage("ESP : " .. tostring(Value))
@@ -1935,7 +1973,6 @@ Tab:CreateButton({
 Tab:CreateToggle({
 	Name = "Chat Spammer",
 	CurrentValue = false,
-	Flag = "Toggle1",
 	Callback = function(messi)
 		getfenv().bunnilol = messi
 		if not SpamTextttttt or SpamTextttttt == "" then
@@ -1976,6 +2013,9 @@ Tab:CreateSlider({
 	CurrentValue = Speedy,
 	Callback = function(value)
 		Speedy = value
+		if ahh then
+			Player.Character.Humanoid.WalkSpeed = Speedy
+		end
 	end
 })
 
@@ -1990,9 +2030,27 @@ Tab:CreateSlider({
 	CurrentValue = Jumppy,
 	Callback = function(cr7)
 		Jumppy = cr7
+		if ahhh then
+			Player.Character.Humanoid.JumpPower = Jumppy
+		end
 	end
 })
-
+Tab:CreateSlider({
+	Name = "FOV",
+	Range = {
+		1,
+		120
+	},
+	Increment = 1,
+	Suffix = "",
+	CurrentValue = Fov,
+	Callback = function(Value)
+		Fov = Value
+		if ahhhh then
+			workspace.CurrentCamera.FieldOfView = Fov
+		end
+	end
+})
 Tab:CreateSlider({
 	Name = "Fly Speed",
 	Range = {
@@ -2070,7 +2128,6 @@ local ACS_X, ACS_Y, ACS_Z
 Tab2:CreateToggle({
 	Name = "ACS 블록설치 (10개만 설치가능 + 죽으면 10개로 초기화)",
 	CurrentValue = false,
-	Flag = "Toggle",
 	Callback = function(Value)
 		if Value then
 			showMessage("ACS_Breach : " .. tostring(Value))
@@ -2118,7 +2175,6 @@ Tab2:CreateButton({
 Tab2:CreateToggle({
 	Name = "ACS 소리테러",
 	CurrentValue = false,
-	Flag = "Toggle",
 	Callback = function(state)
 		getfenv().ACS_whizz = state
 		if state then
@@ -2137,7 +2193,6 @@ Tab2:CreateToggle({
 Tab2:CreateToggle({
 	Name = "ACS 렉",
 	CurrentValue = false,
-	Flag = "Toggle",
 	Callback = function(state)
 		getfenv().ACS_laggy = state
 		if state then
@@ -2167,7 +2222,6 @@ Tab2:CreateSlider({
 	Increment = 1,
 	Suffix = "",
 	CurrentValue = 1,
-	Flag = "Slider1",
 	Callback = function(hello)
 		getgenv().AWP_exitscam = hello
 	end,
@@ -2176,7 +2230,6 @@ Tab2:CreateSlider({
 Tab2:CreateToggle({
 	Name = "ACS 화면테러(약)",
 	CurrentValue = false,
-	Flag = "Toggle",
 	Callback = function(state)
 		getfenv().lemon = state
 		if state then
@@ -2207,7 +2260,6 @@ Tab2:CreateButton({
 Tab2:CreateToggle({
 	Name = "CE 클릭폭발",
 	CurrentValue = false,
-	Flag = "Toggle",
 	Callback = function(Value)
 		if Value then
 			setupMouseClickHandler()
@@ -2236,7 +2288,6 @@ Tab2:CreateButton({
 
 Tab2:CreateToggle({
 	Name = "CE Select KILL",
-	Flag = "Toggle",
 	Callback = function(Value)
 		if Value then
 			CE_EX_target_Kill_sw = true
@@ -2427,7 +2478,6 @@ Tab3:CreateSection("밥밥 부대")
 
 Tab3:CreateToggle({
 	Name = "글록 ALL KILL (글록필요)",
-	Flag = "Toggle",
 	Callback = function(Value)
 		if Value then
 			isGlockAllKillEnabled = true
@@ -2442,7 +2492,6 @@ Tab3:CreateToggle({
 
 Tab3:CreateToggle({
 	Name = "가까운 플레이어 세계밖으로 떨구기 (수갑 필요)",
-	Flag = "Toggle",
 	Callback = function(Value)
 		if Value then
 			babbab_Kick_Cuff_ON()
@@ -2455,7 +2504,6 @@ Tab3:CreateToggle({
 
 Tab3:CreateToggle({
 	Name = "작대기 크기 키우기",
-	Flag = "Toggle",
 	Callback = function(Value)
 		if Value then
 			adjustWeaponSize(true)-- 작대기 키우는 스크립트
@@ -2770,5 +2818,32 @@ Tab3:CreateToggle({
 		end)
 	end,
 })
+
+local Tab4 = Window:CreateTab("Misc", "ellipsis")
+Tab4:CreateDivider()
+
+Tab4:CreateButton({
+	Name = "Destory UI",
+	Callback = function()
+		Rayfield:Destroy()
+	end,
+})
+
+Tab4:CreateButton({
+	Name = "Join IWV Hub Disocrd",
+	Callback = function()
+		setclipboard("https://discord.gg/FQRNud54Zr")
+		Rayfield:Notify({
+			Title = "IWV hub Reborn",
+			Content = "링크가 클립보드에 복사됨",
+			Duration = 3,
+			Image = "info",
+		})	
+	end,
+})
+
+Tab4:CreateSection("Credit")
+
+Tab4:CreateLabel("Credit to IWV & Community", "scroll", Color3.fromRGB(79, 39, 96), false)
 
 ArrayField:LoadConfiguration()
