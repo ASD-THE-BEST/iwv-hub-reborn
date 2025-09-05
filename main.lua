@@ -12,6 +12,8 @@
 
 -- 2.1.2 change log : 짱구부대 올킬,올 루프킬 추가, CE selectkill 추가,Select allkill 추가,click kill 추가, 최적화들 헤헤
 
+-- 2.1.3 change log : 리모트스파이 추가,dex 추가,솔라라 서포트
+
 -- 서울부대 안티치트 없애기 --
 game.Players.LocalPlayer.CharacterAdded:Connect(function(c)
 	if c:FindFirstChild("JyAntiCheat.lua [READ]") then
@@ -70,12 +72,14 @@ end
 getgenv().iwvhubreborn = false
 
 local iwv_love
-iwv_love = hookmetamethod(game, "__namecall", function(a, ...)
-	if getgenv().iwvhubreborn and typeof(getnamecallmethod()) == "string" and getnamecallmethod():lower() == "kick" then
-		return 0
-	end
-	return iwv_love(a, ...)
-end)
+iwv_love = (pcall(function()
+    return hookmetamethod(game, "__namecall", function(a, ...)
+        if getgenv().iwvhubreborn and getnamecallmethod():lower() == "kick" then
+            return 0
+        end
+        return pcall(iwv_love, a, ...) 
+    end)
+end) and iwv_love) or nil
 -- 끗 --
 Players = game:GetService("Players")
 Player = Players.LocalPlayer
@@ -1937,6 +1941,26 @@ Tab:CreateToggle({
 	end,
 })
 
+Tab:CreateToggle({
+	Name = "BunnyHop",
+	CurrentValue = false,
+	Callback = function(Value)
+		getfenv().BunnyHop = Value
+		if getfenv().BunnyHop then
+			task.spawn(function()
+				while getfenv().BunnyHop do
+					task.wait()
+					if Player.Character.Humanoid.FloorMaterial ~= Enum.Material.Air then
+						task.wait(.02)
+						Player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+					end
+				end
+			end)
+		end
+	end,
+})
+
+
 Tab:CreateButton({
 	Name = "모든 플레이어 날리기 (플레이어 끼리 통과되면 안 됨)",
 	Callback = function()
@@ -2938,10 +2962,25 @@ Tab4:CreateButton({
 	end,
 })
 
+Tab4:CreateSection("other scripts")
+
+Tab4:CreateButton({
+	Name = "Remote Spy",
+	Callback = function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/depthso/Sigma-Spy/refs/heads/main/Main.lua"))()
+		showMessage("Remote Spy")
+	end,
+})
+
+Tab4:CreateButton({
+	Name = "Dex v5",
+	Callback = function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
+		showMessage("Dex v5")
+	end,
+})
+
 Tab4:CreateSection("Credit")
-
 Tab4:CreateLabel("Credit to IWV & Community", "scroll", Color3.fromRGB(79, 39, 96), false)
-
-
 
 ArrayField:LoadConfiguration()
