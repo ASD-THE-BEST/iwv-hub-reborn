@@ -33,7 +33,7 @@ if game.Players.LocalPlayer.Character then
 	end
 end
 -- main
-version = "2.1.2"
+version = "2.1.3"
 local ArrayField = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/ArrayField/main/Source.lua'))()
 getgenv().SecureMode = true
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
