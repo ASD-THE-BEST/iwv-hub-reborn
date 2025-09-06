@@ -69,17 +69,17 @@ if game:GetService("ReplicatedStorage"):FindFirstChild("line") then
 end
 
 -- 로컬스크립트 안티킥 --
-getgenv().iwvhubreborn = false
+getgenv().iwvhubreborn = true
 
 local iwv_love
-iwv_love = (pcall(function()
-    return hookmetamethod(game, "__namecall", function(a, ...)
+pcall(function()
+    iwv_love = hookmetamethod(game, "__namecall", function(qwerqwer, ...)
         if getgenv().iwvhubreborn and getnamecallmethod():lower() == "kick" then
             return 0
         end
-        return pcall(iwv_love, a, ...) 
+        return iwv_love(qwerqwer, ...)
     end)
-end) and iwv_love) or nil
+end)
 -- 끗 --
 Players = game:GetService("Players")
 Player = Players.LocalPlayer
